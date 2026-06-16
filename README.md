@@ -1,4 +1,4 @@
-﻿# RelayForge v0.3.0
+# RelayForge v0.3.0
 
 **Zero-dependency local-first AI coding gateway** - OpenAI / Anthropic compatible.
 Unify your local (Ollama / LM Studio) and cloud API providers behind `http://127.0.0.1:18765/v1` with combo routing,

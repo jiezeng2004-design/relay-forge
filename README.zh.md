@@ -1,4 +1,4 @@
-﻿# RelayForge v0.3.0
+# RelayForge v0.3.0
 
 **零依赖、本地优先的 AI 编程网关** - 兼容 OpenAI / Anthropic 接口。
 将本地 Ollama / LM Studio 和云端 DeepSeek / Groq 等多 providers 统一在 `http://127.0.0.1:18765/v1` 后面，
