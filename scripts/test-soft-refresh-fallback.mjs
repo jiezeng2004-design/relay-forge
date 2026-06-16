@@ -14,7 +14,7 @@
 //
 // This suite is split into two parts:
 //
-//   1. **Static analysis** �?parses the dashboard's inline `<script>`
+//   1. **Static analysis**  -- parses the dashboard's inline `<script>`
 //      block(s) from the rendered HTML and asserts the new code is
 //      present (Authorization injection from sessionStorage, fetch +
 //      document.write, cache: "no-store") and the old code is gone
@@ -22,12 +22,12 @@
 //      fix in place against accidental regressions even though we
 //      cannot run a real browser here.
 //
-//   2. **End-to-end** �?spawns a real relay, fetches GET / with a
+//   2. **End-to-end**  -- spawns a real relay, fetches GET / with a
 //      Bearer token, and asserts the response is the dashboard HTML
 //      (not the token prompt). This is the server-side half of the
 //      contract; the client-side sessionStorage bridge is covered
 //      by the static analysis part. We do NOT spawn a browser to
-//      exercise the in-place fetch + document.write path �?that
+//      exercise the in-place fetch + document.write path  -- that
 //      would require a headless browser, which is intentionally
 //      out of scope for a zero-deps project.
 //
@@ -183,7 +183,7 @@ try {
   }
   check(healthy, "relay becomes healthy within 5s");
 
-  // Fetch the dashboard with no auth �?the softRefresh fallback
+  // Fetch the dashboard with no auth  -- the softRefresh fallback
   // relies on the server returning the full dashboard HTML for a
   // sessionStorage-bearing client, which the server already does
   // when OPENRELAY_ALLOW_NO_AUTH=true. We verify the response

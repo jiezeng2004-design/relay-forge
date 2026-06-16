@@ -18,7 +18,7 @@ RelayForge is a zero-dependency, local-first AI coding gateway that provides Ope
 
 ## Screenshots
 
-The v0.3.0 dashboard screenshots were captured from a real local RelayForge run with a clean demo config and demo token. The images show masked demo credentials only and do not include real API keys, private prompts, usernames, or local user paths.
+The v0.3.0 dashboard screenshots were captured from a real local RelayForge run with a clean demo config and demo token. The images show masked demo credentials only and do not include real API keys, private prompts, usernames, or private logs.
 
 | Overview | Combo Models |
 | --- | --- |

@@ -60,7 +60,7 @@ test("encryptedValue blob is opaque and different each time (random IV)", () => 
   const decryptB = store.getDecryptedValue(b.id);
   assert.equal(decryptA, decryptB, "both decrypt to the same plaintext");
   // The encryptedValue blobs themselves are different (random IVs)
-  // 鈥?peek via internal map to verify
+  //  -- ?peek via internal map to verify
   const rawA = store.records.get(a.id).encryptedValue;
   const rawB = store.records.get(b.id).encryptedValue;
   assert.notEqual(rawA.iv, rawB.iv, "IVs differ between encryptions");
@@ -137,7 +137,7 @@ test("OPENRELAY_KEYSTORE_SECRET env var produces a deterministic key", () => {
   // Cannot inspect masterKey directly, but we can verify cross-instance
   // decrypt by adding a record in one and reading in another.
   const record = a.store.add({ provider: "x", value: "sk-shared-secret" });
-  // b.store reads the same file with the same env-derived key 鈥?should decrypt
+  // b.store reads the same file with the same env-derived key  -- ?should decrypt
   // (we'd need a shared dataDir; use a single dir for this test)
   const c = new SecretStore({ dataDir: a.dir, env, now: fixedNow, random: makeMockRandom() });
   assert.equal(c.getDecryptedValue(record.id), "sk-shared-secret", "env var derives consistent key");
@@ -164,7 +164,7 @@ test("a wrong master.key file is detected and rejected", async () => {
   // Overwrite it with the wrong content.
   const { writeFileSync } = await import("node:fs");
   writeFileSync(join(dir, "master.key"), Buffer.alloc(32, 0x99));
-  // Now construct a new store on the same dir 鈥?add() will fail
+  // Now construct a new store on the same dir  -- ?add() will fail
   // because _decrypt() of any pre-existing record will produce a
   // tag mismatch; but our test only added to the first store before
   // overwriting, so let's add one record with the wrong master.
@@ -204,7 +204,7 @@ test("markUsed() updates lastUsedAt in memory; recordTestResult() persists", () 
   // markUsed: in-memory only.
   store.markUsed(record.id);
   assert.equal(store.get(record.id).lastUsedAt, "2026-06-02T12:00:00.000Z", "lastUsedAt set");
-  // Reload from disk 鈥?lastUsedAt is NOT persisted (intentional to
+  // Reload from disk  -- ?lastUsedAt is NOT persisted (intentional to
   // avoid hammering the disk on every request).
   const reloaded = new SecretStore({ dataDir: dir, env: {}, now: fixedNow, random: makeMockRandom() });
   assert.equal(reloaded.get(record.id).lastUsedAt, null, "lastUsedAt not persisted");

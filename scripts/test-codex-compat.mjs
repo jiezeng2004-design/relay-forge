@@ -5,25 +5,25 @@
 // the finally block.
 //
 // 0.5.7 reliability contract (see scripts/test-utils.mjs):
-//   * killChildProcess �?SIGTERM, wait for "exit", SIGKILL after
+//   * killChildProcess  -- SIGTERM, wait for "exit", SIGKILL after
 //     2s, then destroy() the stdio streams.
-//   * closeServer �?closeIdleConnections / closeAllConnections /
+//   * closeServer  -- closeIdleConnections / closeAllConnections /
 //     graceful close with a hard 1.5s timeout.
-//   * testFetch �?wraps globalThis.fetch with `Connection: close`
+//   * testFetch  -- wraps globalThis.fetch with `Connection: close`
 //     so undici does not park the loop on a 5s keep-alive Socket
 //     after the test scenario returns.
-//   * testFetchWithTimeout �?fetch-phase-only timeout. For
+//   * testFetchWithTimeout  -- fetch-phase-only timeout. For
 //     non-stream / response.status / response.json() callers.
-//   * fetchTextWithTimeout �?0.5.7 fix. The 0.5.6 version
+//   * fetchTextWithTimeout  -- 0.5.7 fix. The 0.5.6 version
 //     protected only the fetch phase, so `response.text()`
 //     could pin the loop for the OS TCP keepalive (120s on
-//     Windows) when an upstream never closed the body �?//     the codex-idle-stream hang. 0.5.7 threads the same
+//     Windows) when an upstream never closed the body  -- //     the codex-idle-stream hang. 0.5.7 threads the same
 //     AbortController through both phases and cancels
 //     `response.body` on timeout so the body read unblocks
 //     with a recognizable error. USE THIS HELPER for every
 //     streaming scenario in this file.
 //
-// 0.5.7 cleanup contract �?finally stages are wrapped
+// 0.5.7 cleanup contract  -- finally stages are wrapped
 // individually so a hang or throw in any one of them is visible
 // in the test output. If a future regression makes the relay
 // hang, the failure is attributed to the right cleanup stage
@@ -102,7 +102,7 @@ const IDLE_STREAM_TIMEOUT_MS = 5000;
 // gets annotated with the listening ports and the relay's exit code
 // so debugging is fast, then marked as failed so the process exits
 // non-zero. We deliberately do not print request bodies, prompts, or
-// API keys �?the test inputs are fixed model names.
+// API keys  -- the test inputs are fixed model names.
 process.on("uncaughtException", (error) => {
   console.error("codex compat test crashed");
   console.error("  mockPort: " + (mockPort ?? "n/a"));
@@ -167,7 +167,7 @@ try {
     activeProfile: "default",
     // 0.5.8: bump cooldownMs to 1000 (was 100) for a wider
     // margin between candidate retries in the relay, and keep
-    // streamIdleTimeoutMs at 1000 (the test-only floor �?    // production clamps to 10000 unless the
+    // streamIdleTimeoutMs at 1000 (the test-only floor  --     // production clamps to 10000 unless the
     // OPENRELAY_TEST_ALLOW_SHORT_IDLE_TIMEOUT env opts the
     // relay out). The 1 s idle timer is the key knob that
     // makes the codex-idle-stream regression deterministic
@@ -334,14 +334,14 @@ try {
   // SIGTERM'd mid-persist and the temp state.json file is left
   // behind (Windows holds the handle until the OS reaps the
   // process). The sleep never prints request bodies, prompts, or
-  // API keys �?it is purely a timing fence.
+  // API keys  -- it is purely a timing fence.
   await sleep(150);
 
   console.log("codex compat test passed");
 } catch (error) {
   // Annotate failures with the listening ports and the relay's exit
   // code so debugging is fast. Never print the request body, prompt
-  // contents, or any upstream API key �?the test inputs are fixed
+  // contents, or any upstream API key  -- the test inputs are fixed
   // model names like "codex" and "ok" that contain no secrets.
   console.error("codex compat test failed");
   console.error("  mockPort: " + (mockPort ?? "n/a"));
@@ -522,7 +522,7 @@ async function responses(port, model, extra = {}) {
 // `responsesStream` with a single 80ms retry for ECONNREFUSED
 // / ECONNRESET so the intermittent race is not a hard test
 // failure. The retry NEVER re-sends a stream body that
-// partially succeeded �?the helper aborts the request on the
+// partially succeeded  -- the helper aborts the request on the
 // first attempt via the AbortController inside
 // `fetchTextWithTimeout`, so a retried call is a fresh
 // request.
@@ -548,7 +548,7 @@ async function responsesStream(port, model, timeoutMs = DEFAULT_REQUEST_TIMEOUT_
       return text;
     } catch (error) {
       // Only retry pure connect-level failures. A 4xx / 5xx
-      // already came from a real relay response �?the test
+      // already came from a real relay response  -- the test
       // should fail on that, not paper over it.
       //
       // 0.5.9: Node 24's undici fetch surfaces the connect
@@ -719,7 +719,7 @@ async function fetchWithRetry(url, options, maxAttempts = 2) {
 // relay later printed a stderr line that triggered an "error"
 // event (or exited after a successful banner but with a
 // non-zero code), the orphan handler would reject() the
-// already-resolved promise �?visible in Node as an
+// already-resolved promise  -- visible in Node as an
 // "UnhandledPromiseRejection" or, in older versions, a silent
 // event-loop pin.
 function waitForRelayPort(child) {

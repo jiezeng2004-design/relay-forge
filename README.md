@@ -46,7 +46,7 @@ flowchart LR
 
 ## Screenshots and Demo
 
-Captured from a real RelayForge v0.3.0 dashboard run with a clean demo config and demo token. No real API keys, local user paths, prompts, or private logs are shown.
+Captured from a real RelayForge v0.3.0 dashboard run with a clean demo config and demo token. No real API keys, private prompts, usernames, or private logs are shown.
 
 | Overview | Combo Models |
 | --- | --- |

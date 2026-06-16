@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# RelayForge v0.1.0 — quick start for Linux / macOS / WSL
+# RelayForge v0.3.1 — quick start for Linux / macOS / WSL
 # Usage: bash start.sh        (uses PORT env or default 18765)
 #        PORT=39210 bash start.sh
 
@@ -23,7 +23,7 @@ if [ "$NODE_MAJOR" -lt 18 ]; then
 fi
 
 echo "============================================"
-echo "  RelayForge v0.1.0"
+echo "  RelayForge v0.3.1"
 echo "  Linux / macOS / WSL Quick Start"
 echo "============================================"
 echo ""

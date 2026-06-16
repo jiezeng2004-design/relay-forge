@@ -30,7 +30,7 @@ RelayForge v0.3.1 is a documentation, CI compatibility, screenshot, and release-
 
 ## Screenshots
 
-The dashboard assets were captured from a real local RelayForge run with a clean demo config. They show masked demo credentials only and do not include real API keys, private prompts, usernames, or local user paths.
+The dashboard assets were captured from a real local RelayForge run with a clean demo config. They show masked demo credentials only and do not include real API keys, private prompts, usernames, or private logs.
 
 | Overview | Combo Models |
 | --- | --- |

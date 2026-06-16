@@ -26,7 +26,7 @@ RelayForge 可以把本地模型（Ollama / LM Studio）和云端 API providers 
 
 ## 截图与演示
 
-以下图片来自 RelayForge v0.3.0 dashboard 的真实本地运行页面，使用干净 demo 配置和 demo token 截取。截图中不包含真实 API key、本机用户路径、真实 prompt 或私有日志。
+以下图片来自 RelayForge v0.3.0 dashboard 的真实本地运行页面，使用干净 demo 配置和 demo token 截取。截图中不包含真实 API key、真实 prompt、用户名或私有日志。
 
 | Overview | Combo Models |
 | --- | --- |

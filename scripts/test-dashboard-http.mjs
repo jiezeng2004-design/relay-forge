@@ -4,14 +4,14 @@
 // root's data/.
 //
 // 0.5.5 cleanup contract (see scripts/test-utils.mjs):
-//   * killChildProcess �?SIGTERM, wait for "exit", SIGKILL after
+//   * killChildProcess  -- SIGTERM, wait for "exit", SIGKILL after
 //     2s, then destroy() the stdio streams. The 0.5.4 line did
 //     proc.kill() + a fixed 200ms setTimeout, which on Windows
 //     is not enough for the child stdio Sockets to release.
-//   * testFetch �?wraps globalThis.fetch with `Connection: close`
+//   * testFetch  -- wraps globalThis.fetch with `Connection: close`
 //     so undici does not park a 5s keep-alive Socket on the
 //     event loop after the test returns.
-//   * cleanupTempDir �?single rm call that swallows ENOENT.
+//   * cleanupTempDir  -- single rm call that swallows ENOENT.
 
 import { spawn } from "node:child_process";
 import { mkdtemp, writeFile, readFile } from "node:fs/promises";
@@ -148,7 +148,7 @@ try {
   const errs = await errResp.json();
   check(Array.isArray(errs), "/admin/error-log returns an array");
 
-  // GET /admin/preview-route?model=auto (P2 路由预览器端�?
+  // GET /admin/preview-route?model=auto (P2 路由预览器端 -- 
   const previewResp = await testFetch(`http://127.0.0.1:${port}/admin/preview-route?model=auto`);
   check(previewResp.status === 200, "GET /admin/preview-route returns 200");
   const previewBody = await previewResp.json();
@@ -158,7 +158,7 @@ try {
   check(Array.isArray(previewBody.preview.candidates), "preview.candidates is an array");
   check(typeof previewBody.preview.summary === "object" && typeof previewBody.preview.summary.total === "number", "preview.summary.total is a number");
 
-  // GET /admin/preview-route?model=unknown-x �?should not throw and should still resolve
+  // GET /admin/preview-route?model=unknown-x  -- should not throw and should still resolve
   const previewUnknown = await testFetch(`http://127.0.0.1:${port}/admin/preview-route?model=this-model-does-not-exist`);
   check(previewUnknown.status === 200, "/admin/preview-route accepts unknown model");
   const previewUnknownBody = await previewUnknown.json();
@@ -172,7 +172,7 @@ try {
   // (the 0.5.x path that produced a 100-300ms token-prompt
   // flash because top-level navigations drop the Authorization
   // header). We never read /admin/keys or any real key
-  // value �?this is a structural check on the sanitized HTML only.
+  // value  -- this is a structural check on the sanitized HTML only.
   // Collect all <script> blocks for structural checks. There are
   // multiple blocks: data injection, dashboard-client.js bundle,
   // per-tab IIFEs (tools, ide). Each has its own scope.
@@ -244,7 +244,7 @@ try {
   // the new keyEnv values are present in the rendered status
   // JSON, plus the updated gemini / xai model names. We re-use
   // the `status` already parsed at the top of the test (do NOT
-  // re-read statusResp �?fetch Response bodies are single-use).
+  // re-read statusResp  -- fetch Response bodies are single-use).
   const templateKeyEnvs = (status.providerTemplates || []).map((t) => t.keyEnv);
   for (const env of ["CEREBRAS_API_KEYS", "DASHSCOPE_API_KEYS", "FIREWORKS_API_KEYS", "VOLCENGINE_API_KEYS", "QIANFAN_API_KEYS", "HUNYUAN_API_KEYS", "CLOUDFLARE_API_KEYS", "HUGGINGFACE_API_KEYS", "GITHUB_MODELS_TOKEN", "NVIDIA_API_KEYS", "LONGCAT_API_KEYS", "SAMBANOVA_API_KEYS", "QINIU_API_KEYS", "KILO_API_KEYS", "LLM7_API_KEYS", "BLAZEAPI_API_KEYS", "BAZAARLINK_API_KEYS"]) {
     check(templateKeyEnvs.includes(env), `/admin/status providerTemplates includes ${env}`);
@@ -254,7 +254,7 @@ try {
   check(gemini && (gemini.models || []).includes("gemini-2.5-flash"), "gemini template has gemini-2.5-flash");
   check(xai && (xai.models || []).includes("grok-3"), "xai template has grok-3");
 
-  // 0.3.19: GET /admin/provider-template-parity �?dry-run catalog coverage audit
+  // 0.3.19: GET /admin/provider-template-parity  -- dry-run catalog coverage audit
   const templateParityResp = await testFetch(`http://127.0.0.1:${port}/admin/provider-template-parity`);
   check(templateParityResp.status === 200, "GET /admin/provider-template-parity returns 200");
   const templateParity = await templateParityResp.json();
@@ -294,7 +294,7 @@ try {
     check(badBody.error === "live_mode_rejected", `provider-template-parity ${param}=true live_mode_rejected`);
   }
 
-  // 0.3.20: GET/POST /admin/provider-template-import-plan/import �?controlled config import
+  // 0.3.20: GET/POST /admin/provider-template-import-plan/import  -- controlled config import
   const importPlanResp = await testFetch(`http://127.0.0.1:${port}/admin/provider-template-import-plan`);
   check(importPlanResp.status === 200, "GET /admin/provider-template-import-plan returns 200");
   const importPlan = await importPlanResp.json();
@@ -427,7 +427,7 @@ try {
   const configAfterRevoke = JSON.parse(await readFile(configPath, "utf8"));
   check(!configAfterRevoke.localConnectorConsents || !configAfterRevoke.localConnectorConsents.opencode, "local-connector-consent revoke removed opencode metadata");
 
-  // 0.3.7: GET /admin/provider-test-preview �?dry-run only, no live mode
+  // 0.3.7: GET /admin/provider-test-preview  -- dry-run only, no live mode
   const previewAllResp = await testFetch(`http://127.0.0.1:${port}/admin/provider-test-preview`);
   check(previewAllResp.status === 200, "GET /admin/provider-test-preview returns 200");
   const previewAll = await previewAllResp.json();
