@@ -1,0 +1,12 @@
+.env
+config.json
+tool-env.ps1
+tool-env.cmd
+tool-env.sh
+tool-verify.ps1
+tool-verify.cmd
+tool-verify.sh
+backups/
+data/
+*.log
+node_modules/

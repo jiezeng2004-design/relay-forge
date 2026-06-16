@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+# Cancel in-flight runs for the same branch / PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 18
+          - 20
+          - 22
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install
+        # 0.5.9: the project is zero-deps and the lockfile is
+        # optional, so `npm ci` falls back to `npm install` if
+        # no package-lock.json is present. We use `npm ci` to
+        # get the pinned dependency graph on every PR, and we
+        # allow it to fall back gracefully.
+        run: npm ci || npm install
+
+      - name: Read-only check
+        # The 0.5.4 invariant: `npm run check` must NOT create
+        # data/ and must NOT print the full RELAY_TOKEN. We
+        # also stash the printed status so a failure can be
+        # diffed without re-running.
+        run: npm run check
+
+      - name: Pre-release (strict)
+        # Stricter distribution check (forbidden files, secret
+        # scan over the source tree). In CI the checkout is
+        # clean — no .env, config.json, data/ present.
+        run: npm run pre-release:ci
+
+      - name: Unit tests
+        # Pure-JS, no HTTP, no spawned children, no mock
+        # upstream. Runs the 15+ scripts in test:unit. Fast
+        # (~30s) and 100% deterministic.
+        run: npm run test:unit
+
+      - name: E2E tests
+        # Spawns the relay child + a mock upstream. Uses
+        # ephemeral ports (PORT=0) so it does not collide
+        # with anything else on the runner. All assertions
+        # are made against the mock, never a real provider.
+        run: npm run test:e2e
+        env:
+          # Belt-and-suspenders: never let a real API key
+          # leak into the CI run if someone accidentally
+          # sets one in the runner's environment.
+          OPENRELAY_ALLOW_NO_AUTH: "true"
+          # Test-only opt-in for the relay's short
+          # streamIdleTimeoutMs floor (see src/config.js).
+          # The production 10s minimum is preserved in
+          # deploys that do not set this.
+          OPENRELAY_TEST_ALLOW_SHORT_IDLE_TIMEOUT: "true"
+
+      - name: Doctor (redacted diagnostic)
+        # Confirms the doctor command works on every platform
+        # and that the output is redacted (no real API key,
+        # no full token).
+        run: npm run doctor
