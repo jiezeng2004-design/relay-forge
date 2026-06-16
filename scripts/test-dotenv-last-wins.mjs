@@ -97,12 +97,12 @@ test("0.6.2: duplicate keys in .env follow last-write-wins (the original 0.6.1 b
       "# .env example template",
       "RELAY_TOKEN=",
       "# a comment block",
-      "RELAY_TOKEN=zengjie",
+      "RELAY_TOKEN=last-token-value",
       ""
     ].join("\n"),
     ["RELAY_TOKEN"]
   );
-  assert.equal(result.RELAY_TOKEN, "zengjie", "RELAY_TOKEN should be the last value in the file");
+  assert.equal(result.RELAY_TOKEN, "last-token-value", "RELAY_TOKEN should be the last value in the file");
 });
 
 test("0.6.2: three+ occurrences still follow last-write-wins", async () => {

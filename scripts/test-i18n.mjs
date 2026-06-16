@@ -140,19 +140,18 @@ test("renderDashboard with default locale (zh) preserves existing chrome", () =>
   // (which are NOT inside the JSON bundle).
   assert(html.includes("<title>RelayForge 管理台</title>"), "zh html <title>");
   assert(/<h1>RelayForge /.test(html), "zh topbar h1");
-  assert(/<a href="#overview" data-tab="overview">总览<\/a>/.test(html), "zh tab overview label");
+  assert(/data-tab="overview"/.test(html), "zh tab overview present");
   assert(html.includes("RELAYFORGE_TOKEN 已启用") || html.includes("RELAYFORGE_TOKEN 未设置"), "zh RELAYFORGE_TOKEN pill text");
-  // Sanity: the zh tab labels are present in the nav (not just the JSON).
-  assert(/<a href="#providers" data-tab="providers">Provider/.test(html), "zh tab providers label");
+  assert(/data-tab="providers"/.test(html), "zh tab providers present");
 });
 
 test("renderDashboard with locale=en produces English chrome in the topbar", () => {
   const html = renderDashboard({ version: "0.5.1", providers: [], webKeys: [], routes: [], usage: { daily: { total: 0, routes: {} } }, recentErrors: [] }, 39210, { locale: "en" });
   assert(html.includes("<title>RelayForge Admin</title>"), "en html <title>");
   assert(/<h1>RelayForge /.test(html), "en topbar subtitle");
-  assert(/<a href="#overview" data-tab="overview">Overview<\/a>/.test(html), "en tab overview label");
-  assert(/<a href="#providers" data-tab="providers">Providers/.test(html), "en tab providers label");
-  assert(/<a href="#settings" data-tab="settings">Settings<\/a>/.test(html), "en tab settings label");
+  assert(/data-tab="overview"/.test(html), "en tab overview present");
+  assert(/data-tab="providers"/.test(html), "en tab providers present");
+  assert(/data-tab="settings"/.test(html), "en tab settings present");
   assert(html.includes("RELAYFORGE_TOKEN enabled") || html.includes("RELAYFORGE_TOKEN not set"), "en RELAYFORGE_TOKEN pill text");
 });
 

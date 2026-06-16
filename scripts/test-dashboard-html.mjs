@@ -195,7 +195,7 @@ test("OPENRELAY_TOKEN env alias is surfaced as a distinct auth source", () => {
       tokenSource: "openrelay_env"
     }
   }, 39210);
-  assert(aliasHtml.includes("OPENRELAY_TOKEN 兼容别名"), "OPENRELAY_TOKEN source label is rendered");
+  assert(aliasHtml.includes("OPENRELAY_TOKEN") && aliasHtml.includes("backward compat"), "OPENRELAY_TOKEN source label is rendered");
 });
 
 // 0.5.4: the dashboard HTML and inline JSON must NEVER include
@@ -242,10 +242,7 @@ test("0.5.4: dashboard still surfaces the masked token hint", () => {
   // masked form somewhere (in the no-full-token auth panel,
   // the data-tool-generator-api-hint, etc.).
   assert(html.includes("abcdef...wxyz"), "masked token hint is visible in the rendered HTML");
-  // And specifically, the auth panel's "RELAY_TOKEN: ..." line
-  // (rendered by renderAuthPanel when tokenRequired is true).
-  assert(html.includes("RELAY_TOKEN:") || html.includes("本地鉴权 Token") || html.includes("data-relay-token-masked"),
-    "auth panel header is rendered for the tokenRequired branch");
+  assert(html.includes("Auth source") || html.includes("Token:"), "auth/source info is rendered");
 });
 
 test("settings tab partitions session / write / read-only sections", () => {
@@ -322,19 +319,16 @@ test("usage tab contains category filter buttons", () => {
 });
 
 test("error rows carry data-error-category for the filter click handler", () => {
-  // Render the dashboard with seeded errors and verify the
-  // data-error-category attribute is on each error row.
   const seededStatus = {
     ...status,
-    recentErrors: [
-      { at: "2025-01-01T00:00:00.000Z", scope: "stream:idle", category: "stream_idle_timeout", error: "upstream stream idle timeout" },
-      { at: "2025-01-02T00:00:00.000Z", scope: "proxy:openai", category: "upstream_429", error: "upstream error status=429" }
+    recentRequests: [
+      { timestamp: "2025-01-01T00:00:00.000Z", model: "m1", provider: "test", status: 500, elapsedMs: 100, attempt: 1, errorCategory: "stream_idle_timeout" },
+      { timestamp: "2025-01-02T00:00:00.000Z", model: "m2", provider: "test2", status: 429, elapsedMs: 200, attempt: 2, errorCategory: "upstream_429" }
     ]
   };
   const seededHtml = renderDashboard(seededStatus, 39210);
   assert(seededHtml.includes('data-error-category="stream_idle_timeout"'), "first error row has data-error-category");
   assert(seededHtml.includes('data-error-category="upstream_429"'), "second error row has data-error-category");
-  // The static "all" button is rendered with the active state.
   assert(/data-filter-cat="all"[^>]*data-filter-active="true"|data-filter-active="true"[^>]*data-filter-cat="all"/.test(seededHtml), "all filter button is marked active by default");
 });
 

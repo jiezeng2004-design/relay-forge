@@ -29,7 +29,10 @@ import { renderToolCards } from "./tabs/tools.js";
 import { renderUsageTab } from "./tabs/usage.js";
 import { renderSettingsTab } from "./tabs/settings.js";
 import { renderIdeTab } from "./tabs/ide.js";
+import { renderComboModelsTab } from "./tabs/combo-models.js";
+import { renderClientsTab } from "./tabs/clients.js";
 import { getBundlesForClient, I18N_DEFAULT_LOCALE, I18N_SUPPORTED_LOCALES, makeT } from "../i18n.js";
+import { DASHBOARD_CSS } from "./css.js";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -45,6 +48,8 @@ export function renderDashboard(status, port, options = {}) {
   const locale = I18N_SUPPORTED_LOCALES.includes(options.locale) ? options.locale : I18N_DEFAULT_LOCALE;
   const t = makeT(locale);
   const i18nBundle = getBundlesForClient(locale);
+  const providers = status.providers || [];
+  const combos = status.combos || [];
   const webKeys = status.webKeys || [];
   const providerTemplates = status.providerTemplates || [];
   const routes = status.routes || [];
@@ -52,6 +57,11 @@ export function renderDashboard(status, port, options = {}) {
   const profileList = (status.profiles && status.profiles.profiles) || [];
   const activeProfileName = (status.profiles && status.profiles.activeProfile) || null;
   const defaultModel = (status.profiles && status.profiles.defaultModel) || null;
+  const recentErrors = status.recentErrors || [];
+  const recentRequests = status.recentRequests || [];
+  const healthCache = status.healthCache || {};
+  const keys = status.keys || {};
+  const providerHealth = status.providerHealth || {};
 
   // JSON-injected for the inline <script> below
   const providersScript = scriptJson(status.providers || []);
@@ -89,7 +99,7 @@ export function renderDashboard(status, port, options = {}) {
   }, {});
 
   // ---- provider rows (table-friendly) ----
-  const providerRows = status.providers.map((provider) => renderProviderTableRow(provider, webKeysByProvider, status.healthCache || {}, status.keys || {}, status.providerHealth || {}, status.balanceCache || {})).join("");
+  const providerRows = providers.map((provider) => renderProviderTableRow(provider, webKeysByProvider, healthCache, keys, providerHealth, status.balanceCache || {})).join("");
 
   // ---- route rows ----
   const routeRows = routes.map((route) => renderRouteRow(route, status.usage, status.usage.limits)).join("");
@@ -202,7 +212,7 @@ export function renderDashboard(status, port, options = {}) {
   const providerTemplateOptions = providerTemplates
     .map((template) => `<option value="${escapeHtml(template.name)}">${escapeHtml(template.displayName || template.name)}</option>`)
     .join("");
-  const providerOptions = status.providers
+  const providerOptions = providers
     .map((p) => {
       const webCount = (webKeysByProvider[p.name] || []).filter((key) => key.enabled).length;
       const keyText = p.local
@@ -248,8 +258,8 @@ export function renderDashboard(status, port, options = {}) {
   </form>`;
 
   // ---- overview summary numbers ----
-  const providerCount = status.providers.length;
-  const localProviderCount = status.providers.filter((p) => p.local).length;
+  const providerCount = providers.length;
+  const localProviderCount = providers.filter((p) => p.local).length;
   const cloudProviderCount = providerCount - localProviderCount;
   const totalWebKeys = webKeys.length;
   const todayRequests = (status.usage && status.usage.daily && status.usage.daily.total) || 0;
@@ -286,22 +296,9 @@ export function renderDashboard(status, port, options = {}) {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(t("app.title"))}</title>
-  <style>
+  <style>${DASHBOARD_CSS}
     :root { color-scheme: light; --bg: #f6f7f9; --surface: #fff; --text: #172033; --muted: #657184; --line: #d9e0ea; --soft: #edf2f7; --accent: #2563eb; --accent-soft: #dbeafe; --good: #16794c; --good-soft: #d1fae5; --warn: #a45d00; --warn-soft: #fde68a; --bad: #b42318; --bad-soft: #fecaca; }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", Arial, sans-serif; color: var(--text); background: var(--bg); line-height: 1.5; }
-    .topbar { background: var(--surface); border-bottom: 1px solid var(--line); padding: 12px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .topbar h1 { margin: 0; font-size: 18px; font-weight: 700; }
-    .topbar .sub { color: var(--muted); font-size: 12px; margin-left: 10px; }
-    .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 0; max-width: 1280px; margin: 0 auto; padding: 0; }
-    .sidebar { background: var(--surface); border-right: 1px solid var(--line); padding: 16px 0; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; }
-    .sidebar nav { display: flex; flex-direction: column; gap: 2px; padding: 0 10px; }
-    .sidebar a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 6px; color: var(--text); font-size: 13px; font-weight: 500; text-decoration: none; }
-    .sidebar a:hover { background: var(--soft); }
-    .sidebar a.active { background: var(--accent-soft); color: var(--accent); }
-    .sidebar a .count { margin-left: auto; font-size: 11px; color: var(--muted); background: var(--soft); padding: 1px 6px; border-radius: 999px; }
-    .content { padding: 22px; min-width: 0; }
+    .rf-sidebar ~ .content { margin-left: 220px; }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
     h2 { margin: 0 0 14px; font-size: 18px; }
@@ -318,22 +315,10 @@ export function renderDashboard(status, port, options = {}) {
     .metric { padding: 14px; }
     .metric .label { color: var(--muted); font-size: 12px; }
     .metric .value { display: block; margin-top: 6px; font-size: 24px; font-weight: 700; line-height: 1.1; }
-    .metric .value.ok { color: var(--good); }
-    .metric .value.warn { color: var(--warn); }
-    .metric .value.bad { color: var(--bad); }
-    .metric .sub { color: var(--muted); font-size: 11px; margin-top: 4px; }
-    .panel { padding: 16px; }
-    .panel + .panel { margin-top: 12px; }
-    .panel-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
-    .panel-title h2, .panel-title h3 { margin: 0; }
-    .panel-title h3 { color: var(--text); text-transform: none; letter-spacing: 0; font-size: 14px; font-weight: 700; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { padding: 10px 10px; border-bottom: 1px solid #e8edf4; text-align: left; vertical-align: top; }
     th { background: var(--soft); font-size: 11px; color: #334155; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-    tr:last-child td { border-bottom: 0; }
     code { background: var(--soft); border-radius: 4px; padding: 2px 5px; word-break: break-all; font-size: 12px; }
-    .mono { font-family: Consolas, "Courier New", monospace; font-size: 11px; }
-    .pill { display: inline-flex; align-items: center; min-height: 20px; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; background: var(--soft); color: #334155; }
     .pill.ok { background: var(--good-soft); color: var(--good); }
     .pill.warn { background: var(--warn-soft); color: var(--warn); }
     .pill.bad { background: var(--bad-soft); color: var(--bad); }
@@ -440,26 +425,35 @@ export function renderDashboard(status, port, options = {}) {
       <a href="/health">/health</a>
     </div>
   </div>
-  <div class="layout">
-    <aside class="sidebar">
-      <nav id="tab-nav">
-        <a href="#overview" data-tab="overview">${escapeHtml(t("tab.overview"))}</a>
-        <a href="#providers" data-tab="providers">${escapeHtml(t("tab.providers"))} <span class="count">${providerCount}</span></a>
-        <a href="#routes" data-tab="routes">${escapeHtml(t("tab.routes"))} <span class="count">${routes.length}</span></a>
-        <a href="#tools" data-tab="tools">${escapeHtml(t("tab.tools"))}</a>
-        <a href="#ide" data-tab="ide">${escapeHtml(t("tab.ide"))}</a>
-        <a href="#usage" data-tab="usage">${escapeHtml(t("tab.usage"))} <span class="count">${recentErrorCount}</span></a>
-        <a href="#settings" data-tab="settings">${escapeHtml(t("tab.settings"))}</a>
-      </nav>
+  <div class="rf-layout">
+    <aside class="rf-sidebar">
+      <div class="rf-sidebar-header">
+        <h2>RelayForge</h2>
+        <div class="sub">Local AI Coding Gateway</div>
+        <div class="ver">v${escapeHtml(status.version || "0.2.0")}</div>
+      </div>
+      <ul class="rf-nav" id="tab-nav">
+        <li><a href="#overview" data-tab="overview" class="active"><span class="nav-icon">◉</span>Overview</a></li>
+        <li><a href="#providers" data-tab="providers"><span class="nav-icon">◈</span>Providers <span class="count">${providerCount}</span></a></li>
+        <li><a href="#combo-models" data-tab="combo-models"><span class="nav-icon">🔀</span>Combo Models</a></li>
+        <li><a href="#clients" data-tab="clients"><span class="nav-icon">🔗</span>Clients</a></li>
+        <li><a href="#routes" data-tab="routes"><span class="nav-icon">⊞</span>Routes <span class="count">${routes.length}</span></a></li>
+        <li><a href="#usage" data-tab="usage"><span class="nav-icon">📊</span>Usage <span class="count">${recentErrorCount}</span></a></li>
+        <li><a href="#tools" data-tab="tools"><span class="nav-icon">🛠</span>Tools</a></li>
+        <li><a href="#settings" data-tab="settings"><span class="nav-icon">⚙</span>Settings</a></li>
+        <li><a href="#ide" data-tab="ide"><span class="nav-icon">💻</span>IDE</a></li>
+      </ul>
     </aside>
-    <main class="content">
-      <section id="tab-overview" class="tab-pane" data-pane="overview">${overviewTab}</section>
+    <main class="rf-main">
+      <section id="tab-overview" class="tab-pane active" data-pane="overview">${overviewTab}</section>
       <section id="tab-providers" class="tab-pane" data-pane="providers">${providersTab}</section>
+      <section id="tab-combo-models" class="tab-pane" data-pane="combo-models">${renderComboModelsTab(status)}</section>
+      <section id="tab-clients" class="tab-pane" data-pane="clients">${renderClientsTab({ baseUrl, apiKeyHint, relayAuth: relayAuthState })}</section>
       <section id="tab-routes" class="tab-pane" data-pane="routes">${routesTab}</section>
-      <section id="tab-tools" class="tab-pane" data-pane="tools">${toolsTab}</section>
-      <section id="tab-ide" class="tab-pane" data-pane="ide">${renderIdeTab(status, port)}</section>
       <section id="tab-usage" class="tab-pane" data-pane="usage">${usageTab}</section>
+      <section id="tab-tools" class="tab-pane" data-pane="tools">${toolsTab}</section>
       <section id="tab-settings" class="tab-pane" data-pane="settings">${settingsTab}</section>
+      <section id="tab-ide" class="tab-pane" data-pane="ide">${renderIdeTab(status, port)}</section>
     </main>
   </div>
   <div id="profile-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">

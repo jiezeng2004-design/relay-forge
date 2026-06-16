@@ -143,7 +143,7 @@ export function renderProvidersTab(ctx) {
     <div class="panel">
       <div class="panel-title"><h3>列表</h3>
         <div class="toolbar" style="margin: 0;">
-          <span class="muted">${ctx.status.providers.length} 个 Provider · 筛选：</span>
+          <span class="muted">${(ctx.status.providers || []).length} 个 Provider · 筛选：</span>
           ${filterButtons}
         </div>
       </div>
@@ -264,7 +264,7 @@ export function renderProvidersTab(ctx) {
           </div>
           <div class="field">
             <label>方式 B：从已配置 Provider 拉取（用其已保存的 Key）</label>
-            <select id="discover-models-provider-select" data-discover-models-provider-select>${ctx.status.providers
+            <select id="discover-models-provider-select" data-discover-models-provider-select>${(ctx.status.providers || [])
               .filter(function (p) { return p.apiFormat === "openai"; })
               .map(function (p) {
                 const webCount = (ctx.status.webKeys || []).filter(function (k) { return k.provider === p.name && k.enabled; }).length;

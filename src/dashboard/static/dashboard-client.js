@@ -57,7 +57,8 @@ function escapeHtml(value) {
     const adminTokenInput = document.getElementById("admin-token");
     adminTokenInput.value = sessionStorage.getItem("openrelay.adminToken") || "";
     document.getElementById("admin-token-save").addEventListener("click", () => {
-      sessionStorage.setItem("openrelay.adminToken", adminTokenInput.value.trim());
+      const oldToken = sessionStorage.getItem("openrelay.adminToken"); if (oldToken) sessionStorage.removeItem("openrelay.adminToken");
+sessionStorage.setItem("relayforge.adminToken", adminTokenInput.value.trim());
       setMessage("本地管理 Token 已保存到本次浏览器会话。", "ok");
     });
     document.getElementById("admin-token-clear").addEventListener("click", () => {
@@ -1885,4 +1886,16 @@ function escapeHtml(value) {
     document.getElementById("local-connector-consent-approve")?.addEventListener("click", function () { applyLocalConnectorConsent("approve").catch(function (error) { var s = document.getElementById("local-connector-consent-ledger-output"); if (s) { s.innerHTML = '<div class="notice bad">授权记录写入失败：' + escapeHtml(error.message) + "</div>"; } }); });
     document.getElementById("local-connector-consent-revoke")?.addEventListener("click", function () { applyLocalConnectorConsent("revoke").catch(function (error) { var s = document.getElementById("local-connector-consent-ledger-output"); if (s) { s.innerHTML = '<div class="notice bad">授权记录撤销失败：' + escapeHtml(error.message) + "</div>"; } }); });
     loadConfigEditor().catch(() => {});
+    // Diagnostic summary initialization
+    (function() {
+      var ta = document.getElementById("diagnostic-summary");
+      if (ta) {
+        fetch("/admin/status").then(function(r) { return r.json(); }).then(function(s) {
+          var lines = ["RelayForge diagnostic summary", "---", "Version: " + (s.version || "?"), "Providers: " + ((s.providers && s.providers.length) || 0), "Recent errors: " + ((s.recentErrors && s.recentErrors.length) || 0), "Requests: " + ((s.stats && s.stats.requests) || 0), "Upstream attempts: " + ((s.stats && s.stats.upstreamAttempts) || 0), "---", "Safe to share. No full prompts, keys, or tokens."];
+          ta.value = lines.join("\n");
+        }).catch(function() {
+          ta.value = "RelayForge diagnostic summary\n---\nError loading diagnostics.";
+        });
+      }
+    })();
   

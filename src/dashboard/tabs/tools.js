@@ -255,5 +255,12 @@ bash ./tool-verify.sh</pre>
           });
       })();
     </script>
+    <!-- Diagnostic Summary -->
+    <div class="rf-section">
+      <div class="rf-section-title">Diagnostics</div>
+      <p class="rf-section-desc">Redacted diagnostic data. No full prompts, API keys, or tokens.</p>
+      <textarea id="diagnostic-summary" style="width:100%;height:120px;font-family:monospace;font-size:11px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc" readonly=""></textarea>
+      <p style="font-size:11px;color:#94a3b8;margin-top:4px">Refresh the page to update diagnostics. Safe to share for troubleshooting.</p>
+    </div>
   `;
 }
