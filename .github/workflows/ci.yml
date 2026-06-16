@@ -38,19 +38,10 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Install
-        # 0.5.9: the project is zero-deps and the lockfile is
-        # optional, so `npm ci` falls back to `npm install` if
-        # no package-lock.json is present. We use `npm ci` to
-        # get the pinned dependency graph on every PR, and we
-        # allow it to fall back gracefully.
-        run: npm ci || npm install
-
       - name: Read-only check
-        # The 0.5.4 invariant: `npm run check` must NOT create
-        # data/ and must NOT print the full RELAY_TOKEN. We
-        # also stash the printed status so a failure can be
-        # diffed without re-running.
+        # `npm run check` must NOT create data/ and must NOT
+        # print the full RELAY_TOKEN. We also stash the printed
+        # status so a failure can be diffed without re-running.
         run: npm run check
 
       - name: Pre-release (strict)
