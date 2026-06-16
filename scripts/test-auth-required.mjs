@@ -105,6 +105,16 @@ function spawnRelay({ env, rootOverride, tmpDir } = {}) {
       OPENRELAY_ROOT: rootOverride || tmpDir,
       OPENRELAY_CONFIG: "config.json",
       OPENRELAY_STATE: resolve(tmpDir, "state.json"),
+
+      // Test isolation: do not let CI or the developer shell force auth mode.
+      // Each stage can re-enable the no-auth path or set an explicit token
+      // via the `env` argument that follows.
+      RELAYFORGE_ALLOW_NO_AUTH: "",
+      OPENRELAY_ALLOW_NO_AUTH: "",
+      RELAYFORGE_TOKEN: "",
+      RELAY_TOKEN: "",
+      OPENRELAY_TOKEN: "",
+
       ...env
     },
     stdio: ["ignore", "pipe", "pipe"]

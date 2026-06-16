@@ -63,10 +63,6 @@ jobs:
         # are made against the mock, never a real provider.
         run: npm run test:e2e
         env:
-          # Belt-and-suspenders: never let a real API key
-          # leak into the CI run if someone accidentally
-          # sets one in the runner's environment.
-          OPENRELAY_ALLOW_NO_AUTH: "true"
           # Test-only opt-in for the relay's short
           # streamIdleTimeoutMs floor (see src/config.js).
           # The production 10s minimum is preserved in
