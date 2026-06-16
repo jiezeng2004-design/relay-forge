@@ -1,14 +1,16 @@
 # Parity: RelayForge vs romgX/openrelay
 
-> Purpose: feature gap analysis between `openrelay-like` (our project, v0.3.32) and [romgX/openrelay](https://github.com/romgX/openrelay) (latest public GitHub release v0.10.42, GitHub source package v0.8.3). This document maps public upstream features to our current status and planned milestones. It is based only on public information such as README, FAQ, screenshots, and open-source metadata; no decompilation, reverse engineering, or license bypass is involved.
+> This document records a historical feature-gap review between RelayForge and public OpenRelay materials. RelayForge is independent and is not affiliated with OpenRelay.
+>
+> Purpose: feature gap analysis between `RelayForge` (v0.3.0) and [romgX/openrelay](https://github.com/romgX/openrelay) (latest public GitHub release v0.10.42, GitHub source package v0.8.3). This document maps public upstream features to our current status and planned milestones. It is based only on public information such as README, FAQ, screenshots, and open-source metadata; no decompilation, reverse engineering, or license bypass is involved.
 
-romgX/openrelay uses an Open Core license model: framework features are MIT, while some Pro features require a commercial license. `openrelay-like` is not a fork and does not copy upstream code. It is an independent Node.js implementation aiming for functional equivalence in the non-Pro, non-credential-reading space while staying zero-dependency and MIT-compatible.
+romgX/openrelay uses an Open Core license model: framework features are MIT, while some Pro features require a commercial license. `RelayForge` is not a fork and does not copy upstream code. It is an independent Node.js implementation aiming for functional equivalence in the non-Pro, non-credential-reading space while staying zero-dependency and MIT-compatible.
 
 ---
 
 ## 1. Service Port
 
-| Aspect | romgX/openrelay | openrelay-like | Gap | Plan |
+| Aspect | romgX/openrelay | RelayForge | Gap | Plan |
 |--------|-----------------|----------------|-----|------|
 | Default port | `18765` | `18765` (0.3.23+) | Aligned | Done |
 | Configurable port | `PORT` env | `PORT` env | Aligned | Done |
@@ -19,7 +21,7 @@ romgX/openrelay uses an Open Core license model: framework features are MIT, whi
 
 ## 2. API Compatibility
 
-| Feature | romgX/openrelay | openrelay-like | Gap | Plan |
+| Feature | romgX/openrelay | RelayForge | Gap | Plan |
 |---------|-----------------|----------------|-----|------|
 | OpenAI Chat Completions `POST /v1/chat/completions` | Yes | Yes | None | Done |
 | OpenAI Responses `POST /v1/responses` | Yes | Yes | None | Done |
@@ -38,7 +40,7 @@ romgX/openrelay uses an Open Core license model: framework features are MIT, whi
 
 ### 3.1 Direct API Providers
 
-| Provider | romgX/openrelay | openrelay-like | Notes |
+| Provider | romgX/openrelay | RelayForge | Notes |
 |----------|-----------------|----------------|-------|
 | Anthropic API | Yes | Yes | Aligned |
 | Groq | Yes | Yes | Aligned |
@@ -81,7 +83,7 @@ Upstream public provider target: 34 API/local providers + 11 local/CLI/IDE provi
 
 ### 3.2 Local Endpoint Providers
 
-| Provider | romgX/openrelay | openrelay-like | Notes |
+| Provider | romgX/openrelay | RelayForge | Notes |
 |----------|-----------------|----------------|-------|
 | Ollama | Yes | Yes | Aligned |
 | LM Studio | Yes | Yes | Aligned |
@@ -93,7 +95,7 @@ Upstream public provider target: 34 API/local providers + 11 local/CLI/IDE provi
 
 These require reading local app tokens or sessions, so they remain default-off and consent-gated.
 
-| Provider | Credential source | openrelay-like status |
+| Provider | Credential source | RelayForge status |
 |----------|-------------------|-----------------------|
 | Claude Desktop | Local session | Dry-run plan, availability probe, provider preview, consent manifest, metadata-only consent ledger |
 | Claude Code | CLI credentials | Dry-run plan, availability probe, provider preview, consent manifest, metadata-only consent ledger |
@@ -113,7 +115,7 @@ Current safety boundary: no local app token, cookie, browser profile, keychain, 
 
 ## 4. Tool Integration
 
-| Tool | romgX/openrelay | openrelay-like | Status |
+| Tool | romgX/openrelay | RelayForge | Status |
 |------|-----------------|----------------|--------|
 | Claude Code | Yes | Yes | Aligned |
 | OpenCode | Yes | Yes | Aligned |
@@ -130,7 +132,7 @@ The Work/Tools tab uses a toggle-style selection UX that mirrors upstream's tool
 
 ## 5. IDE RPC Proxy
 
-| IDE | romgX/openrelay method | openrelay-like | Gap |
+| IDE | romgX/openrelay method | RelayForge | Gap |
 |-----|------------------------|----------------|-----|
 | Cursor | RPC proxy | Dry-run panel, status, port check, start plan | Real proxy deferred |
 | Windsurf | RPC proxy | Dry-run panel, status, port check, start plan | Real proxy deferred |
@@ -143,7 +145,7 @@ Proxy work remains dry-run only until security review covers credential handling
 
 ## 6. Model Groups / Routing
 
-| Feature | romgX/openrelay | openrelay-like | Gap |
+| Feature | romgX/openrelay | RelayForge | Gap |
 |---------|-----------------|----------------|-----|
 | Fallback routing | Yes | Yes | Aligned |
 | Round-robin | Yes | Yes | Aligned |
@@ -162,7 +164,7 @@ Proxy work remains dry-run only until security review covers credential handling
 
 ## 7. Dashboard
 
-| Tab | romgX/openrelay | openrelay-like | Gap |
+| Tab | romgX/openrelay | RelayForge | Gap |
 |-----|-----------------|----------------|-----|
 | Overview | Status summary | Status summary, quick start, recent errors | Aligned |
 | Provider | Provider list, quota status, health dots | Provider list, health, key count, cached quota/balance badges and filters (0.3.32), Retry-After badge/filter/details, template parity/import tools | Live quota auto-sync differs |
@@ -220,7 +222,7 @@ These upstream-listed providers are represented in our registry but deliberately
 
 ## 10. Migration & Coexistence
 
-Users migrating from romgX/openrelay to openrelay-like should be able to:
+Users migrating from romgX/openrelay to RelayForge should be able to:
 
 1. Run both simultaneously by overriding one instance with `PORT=39210` or another free port.
 2. Import config manually through Dashboard/config JSON tools.
@@ -239,5 +241,5 @@ Not supported:
 
 > Document version: 4.16
 > Last updated: 2026-06-15
-> Current project version: 0.3.32
+> Current project version: 0.3.0
 > romgX/openrelay reference version: 0.10.42 (latest public GitHub release) / 0.8.3 (GitHub source package)
