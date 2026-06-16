@@ -12,7 +12,7 @@ Formerly known internally as `openrelay-like`.
 
 ## Current version
 
-0.3.0 (see `package.json` and `CHANGELOG.md`).
+0.3.1 (see `package.json` and `CHANGELOG.md`).
 
 ## Combo Models
 

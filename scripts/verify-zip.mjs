@@ -26,7 +26,7 @@ const forbiddenNameGlobs = [
   { name: "opencode handoff doc", re: /^OPENCODE_HANDOFF_[^/]+\.md$/i },
   { name: "codex handoff doc", re: /^CODEX_HANDOFF_[^/]+\.md$/i }
 ];
-const forbiddenDirs = ["data/", "backups/", "node_modules/", ".agent-collab/", ".claude/"];
+const forbiddenDirs = [".git/", "data/", "backups/", "node_modules/", ".agent-collab/", ".claude/"];
 const issues = [];
 
 for (const entry of entries) {

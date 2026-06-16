@@ -1,11 +1,11 @@
-# RelayForge v0.3.0
+# RelayForge v0.3.1
 
 **零依赖、本地优先的 AI 编程网关** - 兼容 OpenAI / Anthropic 接口。
 RelayForge 可以把本地模型（Ollama / LM Studio）和云端 API providers 统一到 `http://127.0.0.1:18765/v1` 后面，并提供 combo 路由、fallback、请求隐私保护和轻量用量统计。
 
 [![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
@@ -54,7 +54,7 @@ RelayForge 可以把本地模型（Ollama / LM Studio）和云端 API providers 
 
 ### A. Windows zip 用户
 
-1. 解压 `relayforge-0.3.0.zip`
+1. 解压 `relayforge-0.3.1.zip`
 2. 双击 **`Start_RelayForge.cmd`**
 3. 打开 http://127.0.0.1:18765
 4. 从启动日志中复制 token
@@ -258,4 +258,4 @@ Routes 用来定义具名模型组，可以使用 fallback、round_robin 或 wei
 
 ---
 
-[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.0.md)
+[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.1.md)

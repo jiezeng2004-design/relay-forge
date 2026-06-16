@@ -1,9 +1,8 @@
-﻿# RelayForge v0.3.0
+# RelayForge v0.3.1
 
 Zero-dependency local-first AI coding gateway with OpenAI/Anthropic compatibility.
 See [README.md](README.md) for full documentation.
 
-## v0.3.0 Dashboard
+## v0.3.1 Release
 
-RelayForge v0.3.0 adds a Premium Dashboard UX: Overview, Providers, Combo Models, Clients, Usage, Diagnostics, and Settings are redesigned for clearer setup, safer diagnostics, and screenshot-ready documentation. It keeps zero npm dependencies and server-rendered HTML with native CSS/JS.
-
+RelayForge v0.3.1 packages the public documentation, CI compatibility fixes, real dashboard screenshots, and release assets built on top of the v0.3 dashboard work. It keeps zero npm dependencies and server-rendered HTML with native CSS/JS.

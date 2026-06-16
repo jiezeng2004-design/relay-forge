@@ -22,7 +22,7 @@ const EXCLUDE_FILE_NAMES = new Set([
   "package-lock.json"
 ]);
 const EXCLUDE_DIR_NAMES = new Set([
-  "node_modules", "data", "backups", "dist", ".agent-collab", ".claude", "analysis"
+  ".git", "node_modules", "data", "backups", "dist", ".agent-collab", ".claude", "analysis"
 ]);
 const EXCLUDE_EXT = new Set([".log", ".err", ".tmp", ".bak", ".zip"]);
 const EXCLUDE_NAME_GLOBS = [

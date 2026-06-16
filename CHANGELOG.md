@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.3.1 - 2026-06-16
+
+### Added
+
+- Real v0.3 dashboard screenshots captured from a local demo run with masked demo credentials only.
+- Short fallback demo GIF covering Overview, Combo Models, Clients, and Diagnostics.
+- v0.3.1 release notes summarizing the latest documentation, CI, screenshot, and compatibility updates.
+
+### Changed
+
+- Refined README, README.zh, and release documentation to reference the captured dashboard assets.
+- Polished public open-source materials and removed remaining internal project/version notes.
+- Aligned OpenRelay parity documentation with RelayForge branding.
+- Removed the legacy openrelay-like checksum artifact from the public tree.
+
+### Fixed
+
+- Fixed README encoding corruption and removed a README BOM.
+- Improved CI compatibility for zero-dependency installs and isolated auth environment state in e2e tests.
+- Added Node 18-compatible CRC32 helper coverage and removed a Node 22-only force-exit flag.
+
+### Security
+
+- Screenshots and demo GIF use only demo tokens, masked key labels, and request metadata without prompt content.
+- Release materials continue to avoid OAuth subscription token routing and real provider credentials.
+
 ## v0.3.0 - 2026-06-16
 
 ### Added

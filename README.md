@@ -1,4 +1,4 @@
-# RelayForge v0.3.0
+# RelayForge v0.3.1
 
 **Zero-dependency local-first AI coding gateway** - OpenAI / Anthropic compatible.
 Unify your local (Ollama / LM Studio) and cloud API providers behind `http://127.0.0.1:18765/v1` with combo routing,
@@ -6,7 +6,7 @@ fallback, request privacy, and lightweight usage analytics.
 
 [![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
@@ -74,7 +74,7 @@ Demo:
 
 ### A. Windows zip users
 
-1. Unzip `relayforge-0.3.0.zip`
+1. Unzip `relayforge-0.3.1.zip`
 2. Double-click **`Start_RelayForge.cmd`**
 3. Open http://127.0.0.1:18765 in your browser
 4. Copy the token from the startup log
@@ -296,5 +296,5 @@ If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedenc
 
 ---
 
-[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.0.md)
+[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.1.md)
 
