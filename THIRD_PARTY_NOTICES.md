@@ -1,8 +1,9 @@
 # Third Party Notices
 
-openrelay-like is an independent reimplementation. Certain design patterns and feature concepts
-were inspired by the following open-source projects. No code was copied from these projects;
-only functional design principles were studied and independently reimplemented.
+RelayForge was initially developed as an independent local-first gateway experiment and is not
+affiliated with OpenRelay. Certain design patterns and feature concepts were inspired by the
+following open-source projects. No code was copied from these projects; only functional design
+principles were studied and independently reimplemented.
 
 ## Reference Projects
 
@@ -18,7 +19,7 @@ only functional design principles were studied and independently reimplemented.
 
 ## Design Principles
 
-openrelay-like follows these design constraints:
+RelayForge follows these design constraints:
 
 1. **Zero npm dependencies** — the entire project runs on Node.js built-in modules only
 2. **Local-first** — binds to 127.0.0.1 by default, no telemetry, no cloud dependency
@@ -28,4 +29,4 @@ openrelay-like follows these design constraints:
 
 ## Credits
 
-- [romgX/openrelay](https://github.com/romgX/openrelay) — the upstream project that inspired this independent reimplementation
+- [romgX/openrelay](https://github.com/romgX/openrelay) — the project that inspired the independent reimplementation

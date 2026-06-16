@@ -171,7 +171,7 @@ Routes define named model groups with fallback/round_robin/weighted strategies:
 }
 ```
 
-### Combo Models (v0.1.0)
+### Combo Models
 
 Combos are virtual models with built-in health-aware routing:
 
@@ -233,26 +233,39 @@ Prompts are never stored in dashboard logs by default.
 
 If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedence.
 
-## Comparison
+## Design Focus
 
-| | RelayForge | LiteLLM | One API | 9Router |
-|---|---|---|---|---|
-| Dependencies | **Zero npm** | Heavy | Heavy | Heavy |
-| Local-first | Yes | No | No | No |
-| OAuth token routing | No | No | No | Yes |
-| Combo models | Yes | Yes | No | Yes |
-| Privacy logs | Yes | No | No | No |
-| MIT License | Yes | Yes | Yes | Yes |
+| Focus | RelayForge |
+|---|---|
+| Runtime dependencies | Zero npm dependencies |
+| Default exposure | Localhost-first |
+| Prompt logging | Off by default |
+| API-key routing | Supported through local provider config |
+| OAuth subscription token routing | Not supported by design |
+| License | MIT |
 
 ## Roadmap
 
-**v0.1.x** - Polish docs, screenshots, demo GIFs, client setup guides, CI stabilization
+### Completed in v0.3.0
+- Dashboard UX redesign
+- Client setup cards
+- Usage, Diagnostics, and Settings pages
+- Light, dark, and system appearance modes
+- Safer local-first configuration and diagnostics
 
-**v0.2.x** - Better dashboard UX, provider health page, config import/export, config validation UI, token/cost estimation
+### Next: v0.4.x
+- Docker support
+- Config import/export
+- Provider health checks UI
+- More client presets
+- Release packaging polish
 
-**v0.3.x** - Plugin-like provider templates, more AI coding client presets, optional local encrypted secrets, Docker support
-
-**Not planned:** OAuth subscription routing, cloud-hosted key sync, built-in account sharing, bypassing provider rate limits, storing full prompts by default.
+### Not planned
+- OAuth subscription token routing
+- Cloud-hosted key sync
+- Built-in account sharing
+- Bypassing provider rate limits
+- Storing full prompts by default
 
 ---
 

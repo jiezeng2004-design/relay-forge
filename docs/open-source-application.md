@@ -8,14 +8,14 @@ Claude Code, CC Switch, Cline) to multiple LLM providers through user-controlled
 routing, combo models, fallback strategies, privacy-first request logs, and lightweight
 usage analytics.
 
-**Repository URL:** _[Insert GitHub URL]_
+**Repository URL:** https://github.com/jiezeng2004-design/relay-forge
 
-**Current Release:** v0.1.0
+**Current Release:** v0.3.0
 
 ## Maintainer Role
 
-_Describe your role — e.g., "Primary maintainer and creator. Responsible for architecture,
-implementation, testing, documentation, and release management."_
+Primary maintainer and original author. Responsible for architecture, implementation,
+testing, documentation, and release management.
 
 ## Problem It Solves
 
@@ -40,30 +40,23 @@ and providers.
 - API keys and Authorization headers redacted in logs
 - Local-first runtime (binds to 127.0.0.1)
 
-## Current Status (to be completed)
+## Current Status
 
-- [ ] GitHub repository URL
-- [ ] v0.1.0 release URL
-- [ ] Demo GIF / screenshot URLs
-- [ ] User feedback links (3–5 issues or discussions)
-- [ ] Tests passing screenshot
+- [x] Public GitHub repository
+- [x] v0.3.0 release with release artifacts
+- [x] MIT License
+- [x] README with architecture, features, and quick start
+- [x] CI workflow (Node 18/20/22 on ubuntu + windows)
+- [x] Local-first privacy design
+- [x] Unit tests and end-to-end tests
+- [x] Pre-release distribution checks
+- [ ] Demo GIF / screenshots (planned for v0.4.x)
+- [ ] External user feedback (early stage)
 
 ## Related Work
 
-RelayForge and [CodexJournal-Lite](https://github.com/anomalyco/CodexJournal-Lite) can
+RelayForge and [CodexJournal-Lite](https://github.com/jiezeng2004-design/CodexJournal-Lite) can
 complement each other in an AI-assisted coding workflow:
 
 - **CodexJournal-Lite**: Coding history, memory, and review
 - **RelayForge**: Model routing, fallback, privacy, and provider access
-
-## Evidence Checklist
-
-- [ ] GitHub repository
-- [ ] v0.1.0 release
-- [ ] README with architecture, features, and quick start
-- [ ] Demo GIF
-- [ ] Screenshots (dashboard, provider config, combo config)
-- [ ] Tests passing
-- [ ] 3–5 user feedback issues/discussions
-- [ ] Related project: CodexJournal-Lite
-- [ ] Public roadmap

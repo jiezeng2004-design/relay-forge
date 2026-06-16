@@ -150,7 +150,7 @@ export ANTHROPIC_API_KEY="<RELAYFORGE_TOKEN>"
 }
 ```
 
-### Combo 模型（v0.1.0）
+### Combo 模型
 
 ```json
 {
@@ -190,26 +190,39 @@ Prompt 默认不会存储在 Dashboard 日志中。
 
 同时设置 `RELAYFORGE_*` 和 `OPENRELAY_*` 时，`RELAYFORGE_*` 优先。
 
-## 对比
+## 设计重点
 
-| | RelayForge | LiteLLM | One API | 9Router |
-|---|---|---|---|---|
-| 依赖 | **零 npm** | 重 | 重 | 重 |
-| 本地优先 | Yes | No | No | No |
-| OAuth 路由 | No | No | No | Yes |
-| Combo 模型 | Yes | Yes | No | Yes |
-| 隐私日志 | Yes | No | No | No |
-| MIT 许可证 | Yes | Yes | Yes | Yes |
+| 重点 | RelayForge |
+|---|---|
+| 运行时依赖 | 零 npm 依赖 |
+| 默认暴露范围 | 仅 localhost |
+| 日志记录 prompt | 默认关闭 |
+| API-key 路由 | 通过本地 provider 配置支持 |
+| OAuth 订阅 token 路由 | 设计上不支持 |
+| 许可证 | MIT |
 
 ## 路线图
 
-**v0.1.x** - 完善文档、截图、demo GIF、客户端配置指南、CI 稳定
+### v0.3.0 已完成
+- Dashboard UX 重新设计
+- 客户端配置卡片
+- Usage、Diagnostics、Settings 页面
+- 亮色/暗色/跟随系统外观模式
+- 更安全的本地优先配置和诊断
 
-**v0.2.x** - 更好的 Dashboard UX、provider 健康页、配置导入/导出、配置校验 UI、token/费用估算
+### 下一阶段：v0.4.x
+- Docker 支持
+- 配置导入/导出
+- Provider 健康检查 UI
+- 更多客户端预设
+- 发布包打磨
 
-**v0.3.x** - 插件式 provider 模板、更多 AI 编程客户端预设、可选的本地加密密钥、Docker 支持
-
-**不计划支持：** OAuth 订阅路由、云端密钥同步、内置账户共享、绕过 provider 速率限制、默认存储完整 prompt。
+### 不计划支持
+- OAuth 订阅 token 路由
+- 云端密钥同步
+- 内置账户共享
+- 绕过 provider 速率限制
+- 默认存储完整 prompt
 
 ---
 
