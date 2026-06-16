@@ -10,7 +10,32 @@ import { tmpdir } from "node:os";
 import { createWriteStream } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { deflateRawSync, crc32 } from "node:zlib";
+import { deflateRawSync } from "node:zlib";
+
+// Node 18 does not export crc32 from node:zlib (it was added in
+// Node 22.2.0). Implement the standard CRC-32 / ZIP CRC-32 (polynomial
+// 0xEDB88320, reflected) here so the test runs on Node 18/20/22.
+// Returns an unsigned 32-bit integer, matching the contract of the
+// native node:zlib.crc32 helper.
+const CRC32_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i += 1) {
+    let c = i;
+    for (let k = 0; k < 8; k += 1) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[i] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(buf) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i += 1) {
+    c = CRC32_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  }
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const verifyZipPath = resolve(rootDir, "scripts", "verify-zip.mjs");
