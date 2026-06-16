@@ -82,7 +82,7 @@ npm.cmd start                  # run the relay on http://127.0.0.1:18765
 - Do not write system environment variables, the Windows registry, or any shell profile.
 - Real API keys must never be written to `README.md`, `config.example.json`, log output, exported config, or the published zip.
 - Tool environment variable scripts must only set current-shell-process env vars (`$env:`, `set`, `export`); never `setx`, never `[Environment]::SetEnvironmentVariable` with `User` / `Machine` scope.
-- The default auth posture is **on** since 0.5.3: do not silently turn it off. The explicit `OPENRELAY_ALLOW_NO_AUTH=true` escape hatch is allowed but must log a warning and the Dashboard must surface a red banner.
+- The default auth posture must stay **on** by default: do not silently turn it off. The explicit `OPENRELAY_ALLOW_NO_AUTH=true` escape hatch is allowed but must log a warning and the Dashboard must surface a red banner.
 - No new npm dependencies. The project is zero-deps. If you think a dep is needed, justify it in a comment in the PR and the maintainer will decide.
 - No `import "npm:..."` or other dynamic installs.
 - Doctor output (`scripts/doctor.mjs`, `scripts/doctor-lib.mjs`) is the only safe surface to paste into an issue / chat. It must NEVER include a full API key, a full RELAY_TOKEN, an Authorization header, a cookie, or a master.key. The redaction contract is enforced by `scripts/test-doctor-redaction.mjs`.
