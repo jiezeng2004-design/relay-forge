@@ -10,39 +10,56 @@ permissions:
 
 jobs:
   test:
-    name: Test Node ${{ matrix.node }} on ${{ matrix.os }}
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        node: [18, 20, 22]
+        os:
+          - ubuntu-latest
+          - windows-latest
+        node:
+          - 18
+          - 20
+          - 22
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
-      - run: npm ci || npm install
-      - run: npm run check
-      - run: npm run pre-release:ci
-      - run: npm run test:unit
-      - run: npm run test:e2e
+
+      - name: Read-only check
+        run: npm run check
+
+      - name: Pre-release (strict)
+        run: npm run pre-release:ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: E2E tests
+        run: npm run test:e2e
         env:
-          OPENRELAY_ALLOW_NO_AUTH: "true"
           OPENRELAY_TEST_ALLOW_SHORT_IDLE_TIMEOUT: "true"
-      - run: npm run doctor
+
+      - name: Doctor (redacted diagnostic)
+        run: npm run doctor
 
   release:
     name: Create Release
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci || npm install
 
       - name: Build distribution zip
         run: npm run build-dist
@@ -51,7 +68,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: RelayForge ${{ github.ref_name }}
-          body_path: CHANGELOG.md
-          files: relayforge-*.zip
+          body_path: docs/release-v0.3.1.md
+          files: |
+            relayforge-*.zip
+            relayforge-*.zip.sha256
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
