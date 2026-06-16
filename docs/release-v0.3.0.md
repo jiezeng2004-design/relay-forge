@@ -16,6 +16,26 @@ RelayForge is a zero-dependency, local-first AI coding gateway that provides Ope
 - Combo Models page with visual routing path
 - Clients page with copy-ready setup cards
 
+## Screenshots
+
+The v0.3.0 dashboard screenshots were captured from a real local RelayForge run with a clean demo config and demo token. The images show masked demo credentials only and do not include real API keys, private prompts, usernames, or local user paths.
+
+| Overview | Combo Models |
+| --- | --- |
+| ![RelayForge overview](assets/relayforge-v0.3-overview-light.png) | ![RelayForge combo models](assets/relayforge-v0.3-combo-models.png) |
+
+| Clients | Diagnostics |
+| --- | --- |
+| ![RelayForge clients](assets/relayforge-v0.3-clients.png) | ![RelayForge diagnostics](assets/relayforge-v0.3-diagnostics.png) |
+
+Additional assets:
+
+- `assets/relayforge-v0.3-overview-dark.png`
+- `assets/relayforge-v0.3-providers.png`
+- `assets/relayforge-v0.3-usage.png`
+- `assets/relayforge-v0.3-settings.png`
+- `assets/relayforge-v0.3-fallback-demo.gif`
+
 ## Security
 
 - RelayForge uses API-key routing only.

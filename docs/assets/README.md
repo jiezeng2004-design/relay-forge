@@ -1,17 +1,24 @@
 # RelayForge Visual Assets
 
-This directory is reserved for real screenshots and demo GIFs used in GitHub Releases and README documentation.
+This directory contains real screenshots and a short demo GIF used in GitHub Releases and README documentation.
 
-## To be captured for v0.3.0
+## Captured for v0.3.0
 
-- Overview page
-- Providers page
-- Combo Models page
-- Clients page
-- Usage page
-- Diagnostics page
-- Settings page
-- Fallback demo GIF
+The assets below were captured from a real local RelayForge dashboard run using a clean demo config, `RELAYFORGE_TOKEN=demo-relayforge-token`, and a demo provider key value that only renders as a masked label.
+
+- `relayforge-v0.3-overview-light.png` - Overview page, light mode
+- `relayforge-v0.3-overview-dark.png` - Overview page, dark mode
+- `relayforge-v0.3-providers.png` - Providers page with demo providers and masked key state
+- `relayforge-v0.3-combo-models.png` - Combo Models page showing `smart-coding` fallback routing
+- `relayforge-v0.3-clients.png` - Clients page with masked demo token config
+- `relayforge-v0.3-usage.png` - Usage page with demo request metadata only
+- `relayforge-v0.3-diagnostics.png` - Diagnostics page with redacted local summaries
+- `relayforge-v0.3-settings.png` - Settings page with appearance and local config controls
+- `relayforge-v0.3-fallback-demo.gif` - Short demo: Overview -> Combo Models -> Clients -> Diagnostics
+
+## Still planned
+
+- None for v0.3.0.
 
 ## Rules
 

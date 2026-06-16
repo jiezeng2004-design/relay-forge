@@ -46,20 +46,29 @@ flowchart LR
 
 ## Screenshots and Demo
 
-Real dashboard screenshots and a short fallback demo GIF are planned for the v0.3.0 release notes.
+Captured from a real RelayForge v0.3.0 dashboard run with a clean demo config and demo token. No real API keys, local user paths, prompts, or private logs are shown.
 
-Planned assets:
+| Overview | Combo Models |
+| --- | --- |
+| ![RelayForge overview](docs/assets/relayforge-v0.3-overview-light.png) | ![RelayForge combo models](docs/assets/relayforge-v0.3-combo-models.png) |
 
-- Overview page
-- Providers page
-- Combo Models page
-- Clients page
-- Usage page
-- Diagnostics page
-- Settings page
-- Fallback demo GIF
+| Clients | Diagnostics |
+| --- | --- |
+| ![RelayForge clients](docs/assets/relayforge-v0.3-clients.png) | ![RelayForge diagnostics](docs/assets/relayforge-v0.3-diagnostics.png) |
 
-See `docs/assets/README.md` for the capture checklist.
+| Providers | Usage |
+| --- | --- |
+| ![RelayForge providers](docs/assets/relayforge-v0.3-providers.png) | ![RelayForge usage](docs/assets/relayforge-v0.3-usage.png) |
+
+Dark mode and settings:
+
+| Dark Overview | Settings |
+| --- | --- |
+| ![RelayForge dark overview](docs/assets/relayforge-v0.3-overview-dark.png) | ![RelayForge settings](docs/assets/relayforge-v0.3-settings.png) |
+
+Demo:
+
+![RelayForge fallback demo](docs/assets/relayforge-v0.3-fallback-demo.gif)
 
 ## Quick Start
 
