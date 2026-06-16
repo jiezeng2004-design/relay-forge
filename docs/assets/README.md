@@ -1,22 +1,21 @@
-# Screenshot and GIF Asset Checklist
+# RelayForge Visual Assets
 
-These assets are planned but not yet included. They will be captured before the v0.4.x release.
+This directory is reserved for real screenshots and demo GIFs used in GitHub Releases and README documentation.
 
-## Screenshot checklist
+## To be captured for v0.3.0
 
-| Asset | Description | Status |
-|-------|-------------|--------|
-| `relayforge-v0.3-overview-light.png` | Overview in light appearance | To be captured |
-| `relayforge-v0.3-overview-dark.png` | Overview in dark appearance | To be captured |
-| `relayforge-v0.3-combo-models.png` | Combo Models routing path | To be captured |
-| `relayforge-v0.3-clients.png` | Copy-ready client setup cards | To be captured |
-| `relayforge-v0.3-usage.png` | Usage analytics / observability page | To be captured |
-| `relayforge-v0.3-diagnostics.png` | Redacted diagnostics page | To be captured |
-| `relayforge-v0.3-settings.png` | Settings appearance controls | To be captured |
-| `relayforge-v0.3-fallback-demo.gif` | Animated fallback demo | To be captured |
+- Overview page
+- Providers page
+- Combo Models page
+- Clients page
+- Usage page
+- Diagnostics page
+- Settings page
+- Fallback demo GIF
 
-## Recommended tools
+## Rules
 
-- Screenshots: any screen capture tool (Windows Snipping Tool, macOS Cmd+Shift+4)
-- GIF recording: ScreenToGif (Windows), GIPHY Capture (macOS), Peek (Linux)
-- Image optimization: `pngquant`, `squoosh`, or online compressors
+- Do not commit screenshots containing real API keys, tokens, usernames, local paths, or private request data.
+- Use demo providers and redacted tokens only.
+- Prefer 1440px or wider screenshots.
+- Use PNG for screenshots and GIF/WebM for short demos.

@@ -4,6 +4,7 @@
 将本地 Ollama / LM Studio 和云端 DeepSeek / Groq 等多 providers 统一在 `http://127.0.0.1:18765/v1` 后面，
 提供 Combo 路由、fallback、请求脱敏和轻量用量统计。
 
+[![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
@@ -23,6 +24,23 @@
 - **最近请求记录** - 最近 20 条请求元数据（模型、provider、耗时、状态码），不含 prompt 内容
 - **Provider 能力查询** - `/admin/status` 返回 providerCapabilities
 - **不接入 OAuth 订阅 token** - 不读取 Claude Code / Codex / Cursor 个人登录 token
+
+## 截图与演示
+
+Dashboard 真实截图和 fallback 演示 GIF 计划在 v0.3.0 发布说明中补充。
+
+计划中的截图：
+
+- 概览页
+- Providers 页
+- Combo Models 页
+- Clients 页
+- Usage 页
+- Diagnostics 页
+- Settings 页
+- Fallback 演示 GIF
+
+详见 `docs/assets/README.md`。
 
 ## 快速开始
 

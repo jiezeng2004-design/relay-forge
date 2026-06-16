@@ -4,6 +4,7 @@
 Unify your local (Ollama / LM Studio) and cloud API providers behind `http://127.0.0.1:18765/v1` with combo routing,
 fallback, request privacy, and lightweight usage analytics.
 
+[![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
@@ -42,6 +43,23 @@ flowchart LR
 - **Recent requests** - last 20 request metadata (model, provider, latency, status) without prompt content
 - **Provider registry** - capability-based provider queries (`openai_chat`, `anthropic_messages`, `streaming`, `tools`...)
 - **No OAuth subscription tokens** - RelayForge does not read or forward Claude Code / Codex / Cursor personal tokens
+
+## Screenshots and Demo
+
+Real dashboard screenshots and a short fallback demo GIF are planned for the v0.3.0 release notes.
+
+Planned assets:
+
+- Overview page
+- Providers page
+- Combo Models page
+- Clients page
+- Usage page
+- Diagnostics page
+- Settings page
+- Fallback demo GIF
+
+See `docs/assets/README.md` for the capture checklist.
 
 ## Quick Start
 

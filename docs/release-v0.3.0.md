@@ -1,34 +1,63 @@
-# v0.3.0 - Premium Dashboard UX for RelayForge
+# RelayForge v0.3.0 Release Notes
 
-RelayForge v0.3.0 focuses on the local dashboard experience while keeping the project zero-dependency, local-first, and server-rendered.
+RelayForge is a zero-dependency, local-first AI coding gateway that provides OpenAI / Anthropic compatible endpoints for local and cloud model providers.
 
 ## Highlights
 
-- Product-style Overview with running status, Quick Connect, Setup Progress, metrics, next action, and recent activity.
-- Premium sidebar and navigation hierarchy for Overview, Providers, Combo Models, Clients, Usage, Diagnostics, and Settings.
-- Combo Models page that clearly shows one client-facing model name and the upstream routing path.
-- Clients page with copy-ready setup cards for CC Switch, opencode, Codex/OpenAI-compatible clients, Cline, and generic OpenAI-compatible tools.
-- Usage and Diagnostics sections designed for lightweight observability without exposing prompts, keys, or tokens.
-- Light, dark, and system appearance modes powered by CSS variables and `relayforge.appearance` in localStorage.
+- Local-first gateway on `127.0.0.1:18765`
+- OpenAI-compatible `/v1/chat/completions`, `/v1/responses`, `/v1/models`
+- Anthropic-compatible `/v1/messages`
+- Combo model routing with fallback / round-robin / weighted strategies
+- Privacy-first request metadata logging without prompt storage by default
+- Dashboard pages for Overview, Providers, Combo Models, Clients, Usage, Diagnostics, and Settings
+- CI verified on Node 18 / 20 / 22 across Ubuntu and Windows
+- Light, dark, and system appearance modes powered by CSS variables
+- Product-style Overview with running status, Quick Connect, Setup Progress, metrics, and recent activity
+- Combo Models page with visual routing path
+- Clients page with copy-ready setup cards
 
 ## Security
 
-- RelayForge still uses API-key routing only.
+- RelayForge uses API-key routing only.
 - OAuth subscription token routing is not implemented.
 - Full API keys, relay tokens, cookies, and prompts are not rendered in the dashboard.
 - Diagnostic summaries remain redacted and safe to share.
 
-## Design References
+## Install / Run
 
-The redesign references public UI and information architecture ideas from 9Router, Helicone, LiteLLM, One API, New API, and Portkey Gateway. No source code was copied, no external dependencies were added, and AGPL implementation code was not imported.
+```bash
+git clone https://github.com/jiezeng2004-design/relay-forge.git
+cd relay-forge
+node src/server.js
+```
+
+Then open:
+
+```text
+http://127.0.0.1:18765
+```
+
+## Client Setup
+
+Use:
+
+```text
+Base URL: http://127.0.0.1:18765/v1
+API Key: <your RelayForge local token>
+Model: smart-coding
+```
+
+## Privacy Notes
+
+RelayForge does not route OAuth subscription tokens and does not store full prompts by default. It is designed for local API-key based provider configuration.
 
 ## Verification
 
-Run these commands from the project root:
+The v0.3.0 CI workflow passes on:
 
-```powershell
-npm.cmd run check
-npm.cmd run test:unit
-npm.cmd run test:dashboard-ui
-npm.cmd run build-dist
-```
+- Node 18 on ubuntu-latest
+- Node 20 on ubuntu-latest
+- Node 22 on ubuntu-latest
+- Node 18 on windows-latest
+- Node 20 on windows-latest
+- Node 22 on windows-latest
