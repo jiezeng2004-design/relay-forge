@@ -1,69 +1,216 @@
 ﻿# RelayForge v0.3.0
 
-**闆朵緷璧栥€佹湰鍦颁紭鍏堢殑 AI 缂栫▼缃戝叧** 鈥?鍏煎 OpenAI / Anthropic 鎺ュ彛銆?灏嗘湰鍦?Ollama / LM Studio 鍜屼簯绔?DeepSeek / Groq 绛夊 providers 缁熶竴鍦?`http://127.0.0.1:18765/v1` 鍚庨潰锛?鎻愪緵 Combo 璺敱銆乫allback銆佽姹傝劚鏁忓拰杞婚噺鐢ㄩ噺缁熻銆?
+**零依赖、本地优先的 AI 编程网关** - 兼容 OpenAI / Anthropic 接口。
+将本地 Ollama / LM Studio 和云端 DeepSeek / Groq 等多 providers 统一在 `http://127.0.0.1:18765/v1` 后面，
+提供 Combo 路由、fallback、请求脱敏和轻量用量统计。
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](package.json)
-[![渚濊禆](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
-[![骞冲彴](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
+[![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
+[![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
 ---
 
-## 鏍稿績鐗规€?
-- **闆朵緷璧?* 鈥?浠呬娇鐢?Node.js 鍐呯疆妯″潡
-- **鏈湴浼樺厛** 鈥?榛樿缁戝畾 127.0.0.1锛屾棤閬ユ祴銆佹棤浜戦攣瀹?- **OpenAI / Anthropic 鍏煎** 鈥?`/v1/chat/completions`銆乣/v1/messages`銆乣/v1/models`
-- **Combo 妯″瀷** 鈥?铏氭嫙妯″瀷鍚嶈仛鍚堝涓?provider锛屾敮鎸?fallback / round_robin / weighted_round_robin
-- **鏅鸿兘闄嶇骇** 鈥?429/503/瓒呮椂鑷姩鍒囨崲鍒颁笅涓€涓€欓€?- **闅愮榛樿寮€鍚?* 鈥?鏃ュ織涓嶈褰?prompt锛孉PI Key 鑷姩鑴辨晱
-- **鏈€杩戣姹傝褰?* 鈥?鏈€杩?20 鏉¤姹傚厓鏁版嵁锛堟ā鍨嬨€乸rovider銆佽€楁椂銆佺姸鎬佺爜锛夛紝涓嶅惈 prompt 鍐呭
-- **Provider 鑳藉姏鏌ヨ** 鈥?`/admin/status` 杩斿洖 providerCapabilities
-- **涓嶆帴鍏?OAuth 璁㈤槄 token** 鈥?涓嶈鍙?Claude Code / Codex / Cursor 涓汉鐧诲綍 token
+## 核心特性
 
-## 蹇€熷紑濮?
-```bash
-git clone <repo-url> relayforge
-cd relayforge
-cp config.example.json config.json
+- **Premium Dashboard UX** - v0.3.0 新增截图级的 Overview、Providers、Combo Models、Clients、Usage、Diagnostics 和 Settings 页面，支持 light/dark/system 外观。
+- **零依赖** - 仅使用 Node.js 内置模块
+- **本地优先** - 默认绑定 127.0.0.1，无遥测、无云锁定
+- **OpenAI / Anthropic 兼容** - `/v1/chat/completions`、`/v1/messages`、`/v1/responses`、`/v1/models`
+- **Combo 模型** - 虚拟模型名聚合多个 provider，支持 fallback / round_robin / weighted_round_robin
+- **智能降级** - 429/503/超时自动切换到下一个候选
+- **隐私默认开启** - 日志不记录 prompt，API Key 自动脱敏
+- **最近请求记录** - 最近 20 条请求元数据（模型、provider、耗时、状态码），不含 prompt 内容
+- **Provider 能力查询** - `/admin/status` 返回 providerCapabilities
+- **不接入 OAuth 订阅 token** - 不读取 Claude Code / Codex / Cursor 个人登录 token
 
-# 璁剧疆 relay token锛堟帹鑽愶級
-$env:RELAYFORGE_TOKEN = "my-secret-token"
+## 快速开始
 
-# 鍚姩
+### A. Windows zip 用户
+
+1. 解压 `relayforge-0.3.0.zip`
+2. 双击 **`Start_RelayForge.cmd`**
+3. 打开 http://127.0.0.1:18765
+4. 从启动日志中复制 token
+5. 在 AI 编程工具中设置：
+   ```
+   Base URL: http://127.0.0.1:18765/v1
+   API Key:  <RELAYFORGE_TOKEN from startup log>
+   Model:    smart-coding
+   ```
+
+### B. PowerShell 用户
+
+```powershell
+$env:RELAYFORGE_TOKEN = "my-local-token"
+$env:RELAYFORGE_PORT  = "18765"
 node src/server.js
-# RelayForge is running at http://127.0.0.1:18765
 ```
 
-## 鐜鍙橀噺
+### C. macOS / Linux / WSL 用户
 
-| 鍙橀噺 | 鎺ㄨ崘 | 鏃у彉閲忥紙鍚戝悗鍏煎锛?|
+```bash
+export RELAYFORGE_TOKEN="my-local-token"
+export RELAYFORGE_PORT="18765"
+node src/server.js
+```
+
+### D. 用 curl 验证
+
+```bash
+# 列出模型
+curl http://127.0.0.1:18765/v1/models \
+  -H "Authorization: Bearer my-local-token"
+
+# Chat completion
+curl http://127.0.0.1:18765/v1/chat/completions \
+  -H "Authorization: Bearer my-local-token" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"smart-coding","messages":[{"role":"user","content":"Hello!"}]}'
+
+# 管理状态
+curl http://127.0.0.1:18765/admin/status \
+  -H "Authorization: Bearer my-local-token"
+```
+
+## 客户端配置
+
+### CC Switch
+
+```
+Name: RelayForge
+Base URL: http://127.0.0.1:18765/v1
+API Key: <RELAYFORGE_TOKEN>
+Model: smart-coding (或任意 combo/route/provider:model)
+```
+
+### opencode
+
+```json
+{
+  "agents": {
+    "defaults": {
+      "model": { "primary": "smart-coding" }
+    }
+  },
+  "models": {
+    "providers": {
+      "relayforge": {
+        "baseUrl": "http://127.0.0.1:18765/v1",
+        "apiKey": "<RELAYFORGE_TOKEN>",
+        "api": "openai-completions",
+        "models": [{ "id": "smart-coding" }]
+      }
+    }
+  }
+}
+```
+
+### Codex / OpenAI 兼容客户端
+
+```bash
+export OPENAI_BASE_URL="http://127.0.0.1:18765/v1"
+export OPENAI_API_KEY="<RELAYFORGE_TOKEN>"
+```
+
+### Claude Code（OpenAI 兼容模式）
+
+```bash
+export ANTHROPIC_BASE_URL="http://127.0.0.1:18765/v1"
+export ANTHROPIC_API_KEY="<RELAYFORGE_TOKEN>"
+```
+
+> **安全提示：** RelayForge 使用 API key 认证。不会读取或转发 Claude Code、Codex、Cursor 的 OAuth 订阅 token。上游 provider 凭证始终由你控制。
+
+## 配置
+
+### Providers
+
+```json
+{
+  "providers": [
+    { "name": "ollama", "baseUrl": "http://127.0.0.1:11434/v1", "models": ["qwen2.5:7b"] },
+    { "name": "deepseek", "baseUrl": "https://api.deepseek.com/v1", "keyEnv": "DEEPSEEK_API_KEYS", "models": ["deepseek-chat"] }
+  ]
+}
+```
+
+### Routes
+
+```json
+{
+  "routes": [{
+    "name": "coding-local",
+    "strategy": "fallback",
+    "candidates": [
+      { "provider": "deepseek", "model": "deepseek-chat", "weight": 3 },
+      { "provider": "ollama", "model": "qwen2.5:7b", "weight": 1 }
+    ]
+  }]
+}
+```
+
+### Combo 模型（v0.1.0）
+
+```json
+{
+  "combos": [{
+    "name": "smart-coding",
+    "strategy": "fallback",
+    "candidates": [
+      { "provider": "deepseek", "model": "deepseek-chat", "weight": 3, "priority": 2, "enabled": true },
+      { "provider": "groq", "model": "llama-3.1-8b-instant", "weight": 2, "priority": 1, "enabled": true },
+      { "provider": "ollama", "model": "qwen2.5:7b", "weight": 1, "priority": 0, "enabled": true }
+    ]
+  }]
+}
+```
+
+### 隐私
+
+```json
+{
+  "privacy": {
+    "logPrompts": false,
+    "logHeaders": false
+  }
+}
+```
+
+Prompt 默认不会存储在 Dashboard 日志中。
+
+## 环境变量
+
+| 变量 | 推荐 | 旧变量（向后兼容） |
 |----------|-------------|-------------------------|
-| `RELAYFORGE_TOKEN` | 鉁?API 璁よ瘉 token | `RELAY_TOKEN` / `OPENRELAY_TOKEN` |
-| `RELAYFORGE_CONFIG` | 鉁?鑷畾涔夐厤缃矾寰?| `OPENRELAY_CONFIG` |
-| `RELAYFORGE_STATE` | 鉁?鑷畾涔夌姸鎬佽矾寰?| `OPENRELAY_STATE` |
-| `RELAYFORGE_PORT` | 鉁?绔彛閰嶇疆 | `PORT` / `OPENRELAY_PORT` |
+| `RELAYFORGE_TOKEN` | Yes - API 认证 token | `RELAY_TOKEN` / `OPENRELAY_TOKEN` |
+| `RELAYFORGE_CONFIG` | Yes - 自定义配置路径 | `OPENRELAY_CONFIG` |
+| `RELAYFORGE_STATE` | Yes - 自定义状态路径 | `OPENRELAY_STATE` |
+| `RELAYFORGE_PORT` | Yes - 端口配置 | `PORT` / `OPENRELAY_PORT` |
 
-鍚屾椂璁剧疆 `RELAYFORGE_*` 鍜?`OPENRELAY_*` 鏃讹紝`RELAYFORGE_*` 浼樺厛銆?
-## 瀹夊叏璇存槑
+同时设置 `RELAYFORGE_*` 和 `OPENRELAY_*` 时，`RELAYFORGE_*` 优先。
 
-- RelayForge **涓嶆敮鎸?* OAuth 璁㈤槄 token 璺敱
-- **涓嶈鍙?*鏈湴瀹㈡埛绔櫥褰?token
-- 鎺ㄨ崘鍙皢 RELAYFORGE_TOKEN 鏆撮湶缁欏鎴风
-- prompt 榛樿涓嶈褰?- Authorization / API Key 榛樿鑴辨晱
-
-## 瀵规瘮
+## 对比
 
 | | RelayForge | LiteLLM | One API | 9Router |
 |---|---|---|---|---|
-| 渚濊禆 | **闆?npm** | 閲?| 閲?| 閲?|
-| 鏈湴浼樺厛 | 鉁?| 鉂?| 鉂?| 鉂?|
-| OAuth 璺敱 | 鉂?| 鉂?| 鉂?| 鉁?|
-| Combo 妯″瀷 | 鉁?| 鉁?| 鉂?| 鉁?|
-| 闅愮鏃ュ織 | 鉁?| 鉂?| 鉂?| 鉂?|
-| MIT 璁稿彲璇?| 鉁?| 鉁?| 鉁?| 鉁?|
+| 依赖 | **零 npm** | 重 | 重 | 重 |
+| 本地优先 | Yes | No | No | No |
+| OAuth 路由 | No | No | No | Yes |
+| Combo 模型 | Yes | Yes | No | Yes |
+| 隐私日志 | Yes | No | No | No |
+| MIT 许可证 | Yes | Yes | Yes | Yes |
+
+## 路线图
+
+**v0.1.x** - 完善文档、截图、demo GIF、客户端配置指南、CI 稳定
+
+**v0.2.x** - 更好的 Dashboard UX、provider 健康页、配置导入/导出、配置校验 UI、token/费用估算
+
+**v0.3.x** - 插件式 provider 模板、更多 AI 编程客户端预设、可选的本地加密密钥、Docker 支持
+
+**不计划支持：** OAuth 订阅路由、云端密钥同步、内置账户共享、绕过 provider 速率限制、默认存储完整 prompt。
 
 ---
 
-[MIT 璁稿彲璇乚(LICENSE) 路 [绗笁鏂瑰０鏄嶿(THIRD_PARTY_NOTICES.md) 路 [鍙戝竷璇存槑](docs/release-v0.3.0.md)
-
-## v0.3.0 Dashboard
-
-RelayForge v0.3.0 adds a Premium Dashboard UX: Overview, Providers, Combo Models, Clients, Usage, Diagnostics, and Settings are redesigned for clearer setup, safer diagnostics, and screenshot-ready documentation. It keeps zero npm dependencies and server-rendered HTML with native CSS/JS.
-
+[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.0.md)
