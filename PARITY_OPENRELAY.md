@@ -12,7 +12,7 @@ romgX/openrelay uses an Open Core license model: framework features are MIT, whi
 
 | Aspect | romgX/openrelay | RelayForge | Gap | Plan |
 |--------|-----------------|----------------|-----|------|
-| Default port | `18765` | `18765` (0.3.23+) | Aligned | Done |
+| Default port | `18765` | `18765` | Aligned | Done |
 | Configurable port | `PORT` env | `PORT` env | Aligned | Done |
 | Dashboard shows current port | Yes | Yes | Aligned | Done |
 | 18765 compatibility banner | Yes | Yes | Aligned | Done |
@@ -30,7 +30,7 @@ romgX/openrelay uses an Open Core license model: framework features are MIT, whi
 | Streaming SSE | Yes | Yes | None | Done |
 | Non-streaming | Yes | Yes | None | Done |
 | OpenAI to Anthropic cross-format bridge | Native dual formats upstream | Yes | Ahead/compatible | Maintain |
-| Tool/function calling conversion | Yes | Partial+: Chat tool calls, Responses `function_call` / `function_call_output` input mapping, and Responses streaming `function_call` output items are covered (0.3.22, 0.3.26, 0.3.27) | Partial | Continue provider-delta edge-case validation |
+| Tool/function calling conversion | Yes | Partial+: Chat tool calls, Responses `function_call` / `function_call_output` input mapping, and Responses streaming `function_call` output items are covered | Partial | Continue provider-delta edge-case validation |
 | `GET /v1/models` | Grouped by type | Grouped with metadata | Aligned | Done |
 | Provider-direct path `/{provider}/v1/*` | Yes | Yes | Aligned | Done |
 
@@ -72,10 +72,10 @@ romgX/openrelay uses an Open Core license model: framework features are MIT, whi
 | Hugging Face | Yes | Yes | Aligned |
 | LongCat | Yes | Yes | Aligned |
 | Vercel AI Gateway | Yes | Yes | Aligned |
-| Kilo | Yes | Template-only placeholder (0.3.24) | Public Base URL not confirmed; visible but skipped by import |
-| LLM7 | Yes | Template-only placeholder (0.3.24) | Public Base URL not confirmed; visible but skipped by import |
-| BlazeAPI | Yes | Template-only placeholder (0.3.24) | Public Base URL not confirmed; visible but skipped by import |
-| BazaarLink | Yes | Template-only placeholder (0.3.24) | Public Base URL not confirmed; visible but skipped by import |
+| Kilo | Yes | Template-only placeholder | Public Base URL not confirmed; visible but skipped by import |
+| LLM7 | Yes | Template-only placeholder | Public Base URL not confirmed; visible but skipped by import |
+| BlazeAPI | Yes | Template-only placeholder | Public Base URL not confirmed; visible but skipped by import |
+| BazaarLink | Yes | Template-only placeholder | Public Base URL not confirmed; visible but skipped by import |
 
 Current built-in provider templates: 42 total = 37 direct/API-style templates plus 5 local endpoint templates. Four direct/API-style entries are intentionally template-only placeholders because public Base URLs are not confirmed.
 
@@ -151,13 +151,13 @@ Proxy work remains dry-run only until security review covers credential handling
 | Round-robin | Yes | Yes | Aligned |
 | Weighted routing | Yes | Yes | Aligned |
 | Model aliases | Yes | Yes | Aligned |
-| `sk-or-*` routing key format | Yes | Yes: route targets plus explicit `provider:model` targets; malformed keys rejected before proxying (0.3.31) | Aligned |
+| `sk-or-*` routing key format | Yes | Yes: route targets plus explicit `provider:model` targets; malformed keys rejected before proxying | Aligned |
 | Failover on error/429 | Yes | Yes | Aligned |
 | 401/403 handling | Not clearly documented | Falls back to next candidate without retrying same bad-key provider | Compatible |
-| Quota-aware routing | Pro/basic upstream behavior | 429 failover plus Retry-After provider cooldown/demotion (0.3.28), with Dashboard-visible rate-limit bucket (0.3.29) | Partial: live quota/balance sync differs |
+| Quota-aware routing | Pro/basic upstream behavior | 429 failover plus Retry-After provider cooldown/demotion, with Dashboard-visible rate-limit bucket | Partial: live quota/balance sync differs |
 | Per-route daily limits | Yes | Yes | Aligned |
 | Per-provider daily limits | Yes | Yes | Aligned |
-| Per-model daily limits | Yes or Pro | Yes (0.3.25 local soft limit via `limits.models`) | Aligned for local daily soft limits |
+| Per-model daily limits | Yes or Pro | Yes (local soft limit via `limits.models`) | Aligned for local daily soft limits |
 | Health-based routing | Yes | Yes | Aligned |
 
 ---
@@ -167,7 +167,7 @@ Proxy work remains dry-run only until security review covers credential handling
 | Tab | romgX/openrelay | RelayForge | Gap |
 |-----|-----------------|----------------|-----|
 | Overview | Status summary | Status summary, quick start, recent errors | Aligned |
-| Provider | Provider list, quota status, health dots | Provider list, health, key count, cached quota/balance badges and filters (0.3.32), Retry-After badge/filter/details, template parity/import tools | Live quota auto-sync differs |
+| Provider | Provider list, quota status, health dots | Provider list, health, key count, cached quota/balance badges and filters, Retry-After badge/filter/details, template parity/import tools | Live quota auto-sync differs |
 | Routes | Model group management | Route CRUD and preview | Aligned |
 | Work / Tools | One-click tool setup | Safe tool command generator with toggles | Aligned for current-shell generation |
 | IDE | Proxy controls | Dry-run proxy readiness panels | Partial |
@@ -226,8 +226,8 @@ Users migrating from romgX/openrelay to RelayForge should be able to:
 
 1. Run both simultaneously by overriding one instance with `PORT=39210` or another free port.
 2. Import config manually through Dashboard/config JSON tools.
-3. Keep using `RELAY_TOKEN` as the preferred local relay token, or set `OPENRELAY_TOKEN` as an upstream-compatible migration alias when `RELAY_TOKEN` is not set (0.3.30).
-4. Reuse `sk-or-*` routing keys for either named routes or explicit `provider:model` targets (0.3.31).
+3. Keep using `RELAY_TOKEN` as the preferred local relay token, or set `OPENRELAY_TOKEN` as an upstream-compatible migration alias when `RELAY_TOKEN` is not set.
+4. Reuse `sk-or-*` routing keys for either named routes or explicit `provider:model` targets.
 5. Use the same current-shell environment variable patterns for tools.
 
 Not supported:
