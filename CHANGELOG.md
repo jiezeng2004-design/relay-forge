@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.3.0 - 2026-06-16
+
+### Added
+
+- Premium Dashboard visual redesign
+- Refined product-style Overview
+- Improved sidebar and navigation hierarchy
+- More polished Combo Models visualization
+- Better client setup cards
+- Improved Usage analytics layout
+- Better status, empty, warning, and error states
+- Optional light/dark/system appearance support without external dependencies
+- Screenshot-ready dashboard sections
+
+### Changed
+
+- Dashboard layout refined for first-time users
+- Advanced diagnostics moved behind clearer progressive disclosure
+- Visual hierarchy improved across Providers, Combo Models, Clients, Usage, Diagnostics, and Settings
+
+### Security
+
+- Tokens remain masked by default
+- Prompts remain hidden by default
+- Diagnostic summaries remain redacted
+
 ## v0.1.0 - 2026-06-15
 
 First public release under the RelayForge name. Earlier internal builds used the temporary

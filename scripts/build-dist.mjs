@@ -29,9 +29,12 @@ const EXCLUDE_NAME_GLOBS = [
   /^OPENCODE_HANDOFF_.+\.md$/i,
   /^CODEX_HANDOFF_.+\.md$/i,
   /^relayforge-\d+\.\d+\.\d+$/,
+  /^relayforge-\d+\.\d+\.\d+\.zip$/,
+  /^relayforge-\d+\.\d+\.\d+\.zip\.sha256$/,
   /^openrelay-local-safe-\d+\.\d+\.\d+$/,
   /^openrelay-like-.+\.zip$/,
-  /^openrelay-like-.+\.zip\.sha256$/
+  /^openrelay-like-.+\.zip\.sha256$/,
+  /^relay-forge.*\.txt$/
 ];
 
 function shouldExclude(e) {

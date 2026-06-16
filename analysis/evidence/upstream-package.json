@@ -1,0 +1,22 @@
+{
+  "name": "openrelay",
+  "version": "0.8.3",
+  "description": "Multi-provider AI local proxy — extracts auth from locally installed AI desktop apps and exposes a unified HTTP proxy",
+  "type": "module",
+  "bin": {
+    "openrelay": "./dist/index.js"
+  },
+  "dependencies": {
+    "sql.js": "^1.14.0"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "COMMERCIAL-LICENSE.txt"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

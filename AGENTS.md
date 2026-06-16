@@ -1,4 +1,4 @@
-# AGENTS.md — RelayForge
+﻿# AGENTS.md 鈥?RelayForge
 
 Conventions for AI agents and human contributors working on this project.
 
@@ -12,7 +12,7 @@ Formerly known internally as `openrelay-like`.
 
 ## Current version
 
-0.1.0 (see `package.json` and `CHANGELOG.md`).
+0.3.0 (see `package.json` and `CHANGELOG.md`).
 
 ## Combo Models (v0.1.0)
 
@@ -27,8 +27,15 @@ See `src/provider-registry-lib.js` for capability-based provider queries (`opena
 
 See `src/privacy.js` for header/body/key sanitization. Prompts never logged by default.
 
-## Common commands
 
+## v0.3.0 UI audit notes
+
+- Overview should feel like a product front page, not a raw admin table.
+- Providers should foreground key status, local/cloud type, health, and quota/cache hints.
+- Combo Models should visually explain one client model name routing across multiple candidates.
+- Clients should be copy-ready and screenshot-ready for AI coding tools.
+- Usage should read like a lightweight observability panel, while Diagnostics keeps advanced redacted state behind disclosure.
+## Common commands
 ```powershell
 npm.cmd run check              # read-only check (no data/ writes)
 npm.cmd run doctor             # redacted local diagnostic (JSON to stdout)
@@ -84,54 +91,54 @@ npm.cmd start                  # run the relay on http://127.0.0.1:18765
 
 ### Source layout (refactored 0.6.3+)
 
-- `src/server.js` — thin wiring module (~600 lines); state init, context wiring, handler factory calls
-- `src/router.js` — request dispatch table (~80 lines); `createRouter(handlers, ctx)` → `handleRequest(req, res)`
-- `src/lib/route-logic.js` — pure business logic: `selectRoute`, `orderCandidates`, `buildStatus`, route strategy
-- `src/lib/config-ops.js` — config editing/validation/serialization: `applyEditableConfig`, `sanitizeProviderInput`, etc.
-- `src/handlers/admin.js` — factory `createAdminHandlers(ctx)` → all /admin/* CRUD handlers
-- `src/handlers/proxy.js` — factory `createProxyHandlers(ctx)` → proxy/streaming/chat handlers
+- `src/server.js` 鈥?thin wiring module (~600 lines); state init, context wiring, handler factory calls
+- `src/router.js` 鈥?request dispatch table (~80 lines); `createRouter(handlers, ctx)` 鈫?`handleRequest(req, res)`
+- `src/lib/route-logic.js` 鈥?pure business logic: `selectRoute`, `orderCandidates`, `buildStatus`, route strategy
+- `src/lib/config-ops.js` 鈥?config editing/validation/serialization: `applyEditableConfig`, `sanitizeProviderInput`, etc.
+- `src/handlers/admin.js` 鈥?factory `createAdminHandlers(ctx)` 鈫?all /admin/* CRUD handlers
+- `src/handlers/proxy.js` 鈥?factory `createProxyHandlers(ctx)` 鈫?proxy/streaming/chat handlers
 
 ### Existing modules (unchanged)
 
-- `src/runtime-state.js` — single-flight runtime state persister with 200ms write coalescing debounce
-- `src/config.js` — `loadConfig`, `loadDotEnv`, `normalizeConfig`, `detectRuntimeRootDir`, `isLoopbackHost`, `validateProviderBaseUrl`
-- `src/config-schema.js` — `validateConfig(config)` (0.5.2+)
-- `src/auth.js` — `resolveRelayAuth`, `maskToken`, `describeAuth` (0.5.3+)
-- `src/i18n.js` — `translate`, `makeT`, `getBundlesForClient`
-- `src/error-category.js` — 11 server-authoritative error categories + `sanitizeErrorMessage`
-- `src/format-convert.js` — OpenAI ↔ Anthropic non-stream shape conversion
-- `src/ide-proxy-port-check.js` — 0.3.13 dry-run loopback port readiness checks for planned IDE proxy ports
-- `src/ide-proxy-start-plan.js` — 0.3.14 dry-run IDE proxy startup plan, explicit-consent checklist, no listener startup
-- `src/local-connector-plan.js` — 0.3.15 dry-run local connector discovery plan for 11 local/CLI/IDE providers
-- `src/local-connector-availability.js` — 0.3.16 redacted PATH-only availability dry-run for local/CLI connectors
-- `src/local-connector-provider-preview.js` — 0.3.17 dry-run provider/direct-route preview for 11 local/CLI/IDE connectors
-- `src/local-connector-consent-manifest.js` — 0.3.18 dry-run consent/security manifest; no consent storage or credential reads
-- `src/local-connector-consent-approval.js` — 0.3.21 metadata-only local connector consent ledger; confirmation-gated approve/revoke, no credential reads or route registration
-- `src/provider-template-parity.js` — 0.3.19 dry-run provider template catalog coverage audit; no config writes, key storage, network calls, or route registration
-- `src/provider-template-import-plan.js` — 0.3.20 confirmation-gated provider template import plan/apply helpers; imports metadata only, never keys or placeholder URLs
-- `src/responses-stream.js` — OpenAI Responses client ↔ any upstream SSE bridge
-- `src/stream-bridge.js` — OpenAI ↔ Anthropic SSE bridge (0.5.0+)
-- `src/provider-health.js` — sliding-window health tracker (0.5.0+)
-- `src/usage.js` — `UsageTracker` with `recordLatency` / `recordTokens` / `metrics` (0.5.2+)
-- `src/token-estimate.js` — per-family chars-per-token heuristic (0.5.2+)
-- `src/route-preview.js` — pure `resolveRoutePreview(config, ...)` (0.4.x+)
-- `src/secret-store.js` — AES-256-GCM encrypted local key store
-- `src/key-pool.js` — key rotation + cooldown
-- `src/balance.js` — read-only balance endpoint guard
-- `src/http-helpers.js` — `sendJson`, `sendHtml`, `withCorsHeaders`, `isAuthorized`, `isAuthorizedV1`, `setAuthContext`
-- `src/dashboard/` — split dashboard renderer; inline client JS extracted to `static/dashboard-client.js`
-- `scripts/doctor.mjs` + `scripts/doctor-lib.mjs` — redacted local diagnostic (0.5.9+)
-- `scripts/` — 25+ test / build scripts
-- `i18n/{zh,en}.json` — UI string bundles; keep key parity
-- `.github/workflows/ci.yml` — Node 18 / 20 / 22 × ubuntu-latest / windows-latest
-- `.github/workflows/release.yml` — tag-triggered release (test → build-dist → GitHub Release)
+- `src/runtime-state.js` 鈥?single-flight runtime state persister with 200ms write coalescing debounce
+- `src/config.js` 鈥?`loadConfig`, `loadDotEnv`, `normalizeConfig`, `detectRuntimeRootDir`, `isLoopbackHost`, `validateProviderBaseUrl`
+- `src/config-schema.js` 鈥?`validateConfig(config)` (0.5.2+)
+- `src/auth.js` 鈥?`resolveRelayAuth`, `maskToken`, `describeAuth` (0.5.3+)
+- `src/i18n.js` 鈥?`translate`, `makeT`, `getBundlesForClient`
+- `src/error-category.js` 鈥?11 server-authoritative error categories + `sanitizeErrorMessage`
+- `src/format-convert.js` 鈥?OpenAI 鈫?Anthropic non-stream shape conversion
+- `src/ide-proxy-port-check.js` 鈥?0.3.13 dry-run loopback port readiness checks for planned IDE proxy ports
+- `src/ide-proxy-start-plan.js` 鈥?0.3.14 dry-run IDE proxy startup plan, explicit-consent checklist, no listener startup
+- `src/local-connector-plan.js` 鈥?0.3.15 dry-run local connector discovery plan for 11 local/CLI/IDE providers
+- `src/local-connector-availability.js` 鈥?0.3.16 redacted PATH-only availability dry-run for local/CLI connectors
+- `src/local-connector-provider-preview.js` 鈥?0.3.17 dry-run provider/direct-route preview for 11 local/CLI/IDE connectors
+- `src/local-connector-consent-manifest.js` 鈥?0.3.18 dry-run consent/security manifest; no consent storage or credential reads
+- `src/local-connector-consent-approval.js` 鈥?0.3.21 metadata-only local connector consent ledger; confirmation-gated approve/revoke, no credential reads or route registration
+- `src/provider-template-parity.js` 鈥?0.3.19 dry-run provider template catalog coverage audit; no config writes, key storage, network calls, or route registration
+- `src/provider-template-import-plan.js` 鈥?0.3.20 confirmation-gated provider template import plan/apply helpers; imports metadata only, never keys or placeholder URLs
+- `src/responses-stream.js` 鈥?OpenAI Responses client 鈫?any upstream SSE bridge
+- `src/stream-bridge.js` 鈥?OpenAI 鈫?Anthropic SSE bridge (0.5.0+)
+- `src/provider-health.js` 鈥?sliding-window health tracker (0.5.0+)
+- `src/usage.js` 鈥?`UsageTracker` with `recordLatency` / `recordTokens` / `metrics` (0.5.2+)
+- `src/token-estimate.js` 鈥?per-family chars-per-token heuristic (0.5.2+)
+- `src/route-preview.js` 鈥?pure `resolveRoutePreview(config, ...)` (0.4.x+)
+- `src/secret-store.js` 鈥?AES-256-GCM encrypted local key store
+- `src/key-pool.js` 鈥?key rotation + cooldown
+- `src/balance.js` 鈥?read-only balance endpoint guard
+- `src/http-helpers.js` 鈥?`sendJson`, `sendHtml`, `withCorsHeaders`, `isAuthorized`, `isAuthorizedV1`, `setAuthContext`
+- `src/dashboard/` 鈥?split dashboard renderer; inline client JS extracted to `static/dashboard-client.js`
+- `scripts/doctor.mjs` + `scripts/doctor-lib.mjs` 鈥?redacted local diagnostic (0.5.9+)
+- `scripts/` 鈥?25+ test / build scripts
+- `i18n/{zh,en}.json` 鈥?UI string bundles; keep key parity
+- `.github/workflows/ci.yml` 鈥?Node 18 / 20 / 22 脳 ubuntu-latest / windows-latest
+- `.github/workflows/release.yml` 鈥?tag-triggered release (test 鈫?build-dist 鈫?GitHub Release)
 
 ## When you make changes
 
 - Run `npm.cmd run test:unit` for fast feedback, then `npm.cmd run test:e2e`, then `npm.cmd run pre-release` before claiming a change is ready. `npm.cmd test` is `test:unit && test:e2e`.
 - Add tests for any new code path the existing suites do not cover.
 - Update `CHANGELOG.md` (add a `## <next-version>` section under "Unreleased" or your version).
-- Update `i18n/{zh,en}.json` together — they must stay in 1:1 key parity. The `scripts/test-i18n.mjs` suite enforces this.
+- Update `i18n/{zh,en}.json` together 鈥?they must stay in 1:1 key parity. The `scripts/test-i18n.mjs` suite enforces this.
 - Update `config-schema.js` rules if you add new required `config.json` fields.
 - Do not commit real API keys, real tokens, real cookies, real `Authorization` headers, or any output of `/admin/error-log` that includes upstream error bodies.
 - The 0.5.9 `runtimeStatePersister` is the ONLY way to touch `data/runtime-state.json`. Ad-hoc `writeFileSync`+`renameSync` calls in handlers reintroduce the EPERM race the persister was added to fix.
@@ -146,7 +153,8 @@ npm.cmd start                  # run the relay on http://127.0.0.1:18765
 
 ## Out of scope (deferred)
 
-- Native platform keychain integration (Windows DPAPI / macOS Keychain / Linux Secret Service) — keep `data/master.key` + `OPENRELAY_KEYSTORE_SECRET` for now.
+- Native platform keychain integration (Windows DPAPI / macOS Keychain / Linux Secret Service) 鈥?keep `data/master.key` + `OPENRELAY_KEYSTORE_SECRET` for now.
 - A real SPA framework (the current `__spaRefresh` is intentionally minimal; event delegation via `document.body` + `data-action` is the documented next step).
-- A separate "doctor" command — covered today by `npm.cmd run check` + `scripts/check-local.ps1`.
+- A separate "doctor" command 鈥?covered today by `npm.cmd run check` + `scripts/check-local.ps1`.
 - Replacing the `dashboard.js` re-export shim with a fully module-relative import (the shim stays for back-compat until 0.6).
+

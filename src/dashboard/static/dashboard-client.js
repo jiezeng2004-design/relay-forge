@@ -9,6 +9,33 @@ function escapeHtml(value) {
     return "&#39;";
   });
 }
+    // ---- appearance (localStorage only; no server config writes) ----
+    function applyAppearance(value) {
+      var mode = value === "light" || value === "dark" || value === "system" ? value : "system";
+      document.documentElement.setAttribute("data-appearance", mode);
+      document.querySelectorAll("[data-appearance-choice]").forEach(function (btn) {
+        var active = btn.getAttribute("data-appearance-choice") === mode;
+        btn.setAttribute("data-active", active ? "true" : "false");
+        btn.classList.toggle("primary", active);
+      });
+      var select = document.getElementById("appearance-select");
+      if (select && select.value !== mode) select.value = mode;
+    }
+    var savedAppearance = "system";
+    try { savedAppearance = localStorage.getItem("relayforge.appearance") || "system"; } catch (_) {}
+    applyAppearance(savedAppearance);
+    document.querySelectorAll("[data-appearance-choice]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var mode = btn.getAttribute("data-appearance-choice") || "system";
+        try { localStorage.setItem("relayforge.appearance", mode); } catch (_) {}
+        applyAppearance(mode);
+      });
+    });
+    document.getElementById("appearance-select")?.addEventListener("change", function (event) {
+      var mode = event.target.value || "system";
+      try { localStorage.setItem("relayforge.appearance", mode); } catch (_) {}
+      applyAppearance(mode);
+    });
     // ---- tab navigation (hash-routed) ----
     const tabLinks = Array.from(document.querySelectorAll("#tab-nav a[data-tab]"));
     const tabPanes = Array.from(document.querySelectorAll(".tab-pane"));
@@ -55,20 +82,21 @@ function escapeHtml(value) {
       routeMessage.textContent = text;
     };
     const adminTokenInput = document.getElementById("admin-token");
-    adminTokenInput.value = sessionStorage.getItem("openrelay.adminToken") || "";
+    adminTokenInput.value = sessionStorage.getItem("relayforge.adminToken") || sessionStorage.getItem("openrelay.adminToken") || "";
     document.getElementById("admin-token-save").addEventListener("click", () => {
       const oldToken = sessionStorage.getItem("openrelay.adminToken"); if (oldToken) sessionStorage.removeItem("openrelay.adminToken");
 sessionStorage.setItem("relayforge.adminToken", adminTokenInput.value.trim());
       setMessage("本地管理 Token 已保存到本次浏览器会话。", "ok");
     });
     document.getElementById("admin-token-clear").addEventListener("click", () => {
+      sessionStorage.removeItem("relayforge.adminToken");
       sessionStorage.removeItem("openrelay.adminToken");
       adminTokenInput.value = "";
       setMessage("本地管理 Token 已清除。", "muted");
     });
 
     function adminHeaders(extra = {}) {
-      const token = sessionStorage.getItem("openrelay.adminToken") || adminTokenInput.value.trim();
+      const token = sessionStorage.getItem("relayforge.adminToken") || sessionStorage.getItem("openrelay.adminToken") || adminTokenInput.value.trim();
       const headers = { ...extra };
       if (token) headers.authorization = "Bearer " + token;
       return headers;
@@ -204,7 +232,12 @@ sessionStorage.setItem("relayforge.adminToken", adminTokenInput.value.trim());
       rows.forEach((row) => {
         const name = row.getAttribute("data-provider-name") || "";
         const tags = (row.getAttribute("data-provider-status") || "").split(/\s+/).filter(Boolean);
-        const show = filterKey === "all" || tags.includes(filterKey) || (filterKey === "recent-failed" && recentNames.has(name));
+        const cls = row.getAttribute("data-provider-class") || "";
+        const show = filterKey === "all"
+          || tags.includes(filterKey)
+          || (filterKey === "ready" && (cls === "healthy" || cls === "local-ready"))
+          || (filterKey === "healthy" && (cls === "healthy" || cls === "local-ready"))
+          || (filterKey === "recent-failed" && (recentNames.has(name) || cls === "failed"));
         row.hidden = !show;
         if (show) visibleCount += 1;
       });
@@ -244,10 +277,26 @@ sessionStorage.setItem("relayforge.adminToken", adminTokenInput.value.trim());
     }));
     function flashCopy(btn) {
       const original = btn.textContent;
-      btn.textContent = "已复制";
+      btn.textContent = "Copied";
       btn.classList.add("ok");
-      window.setTimeout(() => { btn.textContent = original; btn.classList.remove("ok"); }, 900);
+      window.setTimeout(() => { btn.textContent = original; btn.classList.remove("ok"); }, 1500);
     }
+    document.querySelectorAll("[data-copy]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var target = btn.getAttribute("data-copy") || "";
+        var text = "";
+        if (target.charAt(0) === "#") {
+          var node = document.querySelector(target);
+          text = node ? (node.value || node.textContent || "") : "";
+        } else {
+          text = target;
+        }
+        if (!text) return;
+        navigator.clipboard.writeText(text).then(function () { flashCopy(btn); }).catch(function (error) {
+          setMessage("Copy failed: " + error.message, "bad");
+        });
+      });
+    });
 
     // ---- tool config generator (P1) ----
     function readToolGeneratorData() {

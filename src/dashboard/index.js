@@ -277,7 +277,7 @@ export function renderDashboard(status, port, options = {}) {
     activeProfileName, defaultModel, errorRows, port, status
   });
   const providersTab = renderProvidersTab({
-    providerRows, webKeyRows, providerOptions, providerTemplateOptions, status
+    providerRows, webKeyRows, providerOptions, providerTemplateOptions, status, locale
   });
   const routesTab = renderRoutesTab({
     routeRows, profileRows, keyPoolRows, routeTemplateOptions, profileDefaultOptions, status
@@ -286,174 +286,53 @@ export function renderDashboard(status, port, options = {}) {
   const usageTab = renderUsageTab({
     usageRows, historyRows, errorRows, errorCounts, errors, port, status
   });
+  const diagnosticsTab = renderDiagnosticsTab({
+    healthRows, discoveryRows, balanceRows, keyPoolRows, errors, recentRequests, port, status
+  });
   const settingsTab = renderSettingsTab({
-    healthRows, discoveryRows, balanceRows, port, status
+    healthRows, discoveryRows, balanceRows, port, status, relayAuth: relayAuthState
   });
 
   return `<!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-appearance="system">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(t("app.title"))}</title>
-  <style>${DASHBOARD_CSS}
-    :root { color-scheme: light; --bg: #f6f7f9; --surface: #fff; --text: #172033; --muted: #657184; --line: #d9e0ea; --soft: #edf2f7; --accent: #2563eb; --accent-soft: #dbeafe; --good: #16794c; --good-soft: #d1fae5; --warn: #a45d00; --warn-soft: #fde68a; --bad: #b42318; --bad-soft: #fecaca; }
-    .rf-sidebar ~ .content { margin-left: 220px; }
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
-    h2 { margin: 0 0 14px; font-size: 18px; }
-    h3 { margin: 18px 0 8px; font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-    a { color: var(--accent); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    .grid { display: grid; gap: 12px; }
-    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .card, .metric, .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
-    .card { padding: 16px; }
-    .card.compact { padding: 12px 14px; }
-    .metric { padding: 14px; }
-    .metric .label { color: var(--muted); font-size: 12px; }
-    .metric .value { display: block; margin-top: 6px; font-size: 24px; font-weight: 700; line-height: 1.1; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { padding: 10px 10px; border-bottom: 1px solid #e8edf4; text-align: left; vertical-align: top; }
-    th { background: var(--soft); font-size: 11px; color: #334155; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
-    code { background: var(--soft); border-radius: 4px; padding: 2px 5px; word-break: break-all; font-size: 12px; }
-    .pill.ok { background: var(--good-soft); color: var(--good); }
-    .pill.warn { background: var(--warn-soft); color: var(--warn); }
-    .pill.bad { background: var(--bad-soft); color: var(--bad); }
-    .pill.muted-pill { background: #e5e7eb; color: #475569; }
-    .pill.local { background: #e0e7ff; color: #3730a3; }
-    .pill.cloud { background: #fef3c7; color: #92400e; }
-    .muted { color: var(--muted); }
-    .ok { color: var(--good); }
-    .warn { color: var(--warn); }
-    .bad { color: var(--bad); }
-    .stack { display: flex; flex-wrap: wrap; gap: 6px; }
-    button { min-height: 28px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--text); cursor: pointer; font: inherit; font-size: 12px; }
-    button:hover { border-color: #9eb2ce; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    button.small { padding: 2px 7px; min-height: 24px; font-size: 11px; }
-    .primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
-    .danger { color: var(--bad); border-color: #f3b9b3; }
-    .danger:hover { background: #fff5f5; border-color: var(--bad); }
-    textarea { width: 100%; min-height: 240px; resize: vertical; padding: 10px; border: 1px solid var(--line); border-radius: 6px; font: 12px/1.45 Consolas, "Courier New", monospace; color: var(--text); background: #fbfcfe; }
-    textarea.compact-area { min-height: 70px; }
-    input[type="text"], input[type="password"], select { width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: 13px; background: #fbfcfe; color: var(--text); }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
-    .field { display: grid; gap: 4px; margin-top: 8px; }
-    .field label { font-size: 11px; color: var(--muted); }
-    .field .help { font-size: 11px; color: var(--muted); }
-    .advanced-block { border: 1px solid var(--line); border-radius: 6px; background: #fbfcfe; padding: 10px 12px; margin-top: 8px; }
-    .advanced-block summary { cursor: pointer; color: var(--muted); font-size: 12px; }
-    .inline-key-panel { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fbfcfe; }
-    .inline-key-panel h3 { margin: 0 0 6px; font-size: 13px; color: var(--text); text-transform: none; letter-spacing: 0; }
-    .field-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 10px; align-items: end; }
-    .form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-    .form-grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .route-candidate-row { display: grid; grid-template-columns: minmax(120px, 1fr) minmax(160px, 2fr) 80px auto; gap: 8px; align-items: center; }
-    .route-candidate-row button { white-space: nowrap; }
-    .tool-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .tool-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--surface); }
-    .tool-card h3 { margin: 0 0 6px; font-size: 14px; text-transform: none; letter-spacing: 0; color: var(--text); }
-    .tool-card .muted { font-size: 12px; }
-    .command-box { margin-top: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--soft); padding: 8px; }
-    .command-box pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12px; }
-    .command-box .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .command-box .head strong { font-size: 11px; color: #334155; text-transform: uppercase; letter-spacing: 0.4px; }
-    .notice { margin-top: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fbfcfe; color: var(--muted); font-size: 12px; word-break: break-word; }
-    .notice.ok { background: #f0fdf4; border-color: #bbf7d0; color: #14532d; }
-    .notice.bad { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
-    .notice.warn { background: #fffbeb; border-color: #fde68a; color: #78350f; }
-    .row-actions { display: flex; flex-wrap: wrap; gap: 4px; }
-    .bar { width: 100%; min-width: 80px; height: 8px; border-radius: 999px; background: #e8edf4; overflow: hidden; }
-    .bar span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
-    details.collapsible { border: 1px solid var(--line); border-radius: 6px; background: #fbfcfe; padding: 8px 12px; margin-top: 10px; }
-    details.collapsible summary { cursor: pointer; font-size: 13px; font-weight: 600; }
-    details.collapsible[open] { padding-bottom: 14px; }
-    .endpoint-block { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .endpoint-block code { font-size: 13px; }
-    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
-    .toolbar .spacer { flex: 1; }
-    .quick-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-    .quick-actions button { justify-content: center; min-height: 36px; }
-    .empty-state { display: grid; gap: 6px; padding: 22px 16px; text-align: center; background: var(--soft); border: 1px dashed var(--line); border-radius: 8px; color: var(--muted); }
-    .empty-state strong { font-size: 14px; color: var(--text); }
-    .empty-state span { font-size: 12px; }
-    .section-label { margin: 18px 0 8px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 700; }
-    .section-label:first-child { margin-top: 0; }
-    .err-cat { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 600; background: var(--soft); color: #334155; }
-    .err-cat.stream_idle_timeout,
-    .err-cat.stream_read_failed,
-    .err-cat.stream_parse_failed,
-    .err-cat.upstream_5xx { background: var(--bad-soft); color: var(--bad); }
-    .err-cat.upstream_429,
-    .err-cat.upstream_timeout { background: var(--warn-soft); color: var(--warn); }
-    .err-cat.upstream_auth { background: #fde2e2; color: #991b1b; }
-    .err-cat.upstream_request_failed { background: var(--bad-soft); color: var(--bad); }
-    .err-cat.config_error { background: #fde68a; color: #92400e; }
-    .err-cat.local_limit { background: #fef3c7; color: #92400e; }
-    .err-cat.other { background: #e5e7eb; color: #475569; }
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(20, 27, 45, 0.45); display: none; align-items: center; justify-content: center; z-index: 30; padding: 24px; }
-    .modal-backdrop.open { display: flex; }
-    .modal { background: var(--surface); border-radius: 10px; max-width: 560px; width: 100%; padding: 18px 20px; box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
-    .modal h3 { margin: 0 0 10px; font-size: 16px; }
-    .modal .row { margin-top: 10px; }
-    .modal label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    .modal .row-actions { justify-content: flex-end; margin-top: 16px; }
-    .scroll-x { overflow-x: auto; }
-    @media (max-width: 880px) {
-      .layout { grid-template-columns: 1fr; }
-      .sidebar { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 10px 0; }
-      .sidebar nav { flex-direction: row; flex-wrap: wrap; }
-      .sidebar a { flex: 0 0 auto; }
-      .grid-4, .grid-3, .grid-2, .quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .field-row, .form-grid, .form-grid-2, .tool-grid { grid-template-columns: 1fr; }
-      .route-candidate-row { grid-template-columns: 1fr; }
-      .content { padding: 14px; }
-    }
-  </style>
+  <style>${DASHBOARD_CSS}</style>
 </head>
 <body>
-  <div class="topbar">
-    <h1>RelayForge <span class="sub">${escapeHtml(t("app.subtitle", { version: status.version || "?" }))}</span></h1>
-    <div class="topbar-right">
-      ${localeSwitcher}
-      ${relayTokenBanner}
-      <a href="/v1/models">/v1/models</a>
-      <a href="/health">/health</a>
-    </div>
-  </div>
   <div class="rf-layout">
     <aside class="rf-sidebar">
       <div class="rf-sidebar-header">
         <h2>RelayForge</h2>
         <div class="sub">Local AI Coding Gateway</div>
-        <div class="ver">v${escapeHtml(status.version || "0.2.0")}</div>
+        <div class="ver">v${escapeHtml(status.version || "0.3.0")} · Local-first · Zero dependencies</div>
       </div>
       <ul class="rf-nav" id="tab-nav">
-        <li><a href="#overview" data-tab="overview" class="active"><span class="nav-icon">◉</span>Overview</a></li>
-        <li><a href="#providers" data-tab="providers"><span class="nav-icon">◈</span>Providers <span class="count">${providerCount}</span></a></li>
-        <li><a href="#combo-models" data-tab="combo-models"><span class="nav-icon">🔀</span>Combo Models</a></li>
-        <li><a href="#clients" data-tab="clients"><span class="nav-icon">🔗</span>Clients</a></li>
-        <li><a href="#routes" data-tab="routes"><span class="nav-icon">⊞</span>Routes <span class="count">${routes.length}</span></a></li>
-        <li><a href="#usage" data-tab="usage"><span class="nav-icon">📊</span>Usage <span class="count">${recentErrorCount}</span></a></li>
-        <li><a href="#tools" data-tab="tools"><span class="nav-icon">🛠</span>Tools</a></li>
-        <li><a href="#settings" data-tab="settings"><span class="nav-icon">⚙</span>Settings</a></li>
-        <li><a href="#ide" data-tab="ide"><span class="nav-icon">💻</span>IDE</a></li>
+        <li><a href="#overview" data-tab="overview" class="active"><span class="nav-icon">01</span>Overview</a></li>
+        <li><a href="#providers" data-tab="providers"><span class="nav-icon">02</span>Providers <span class="count">${providerCount}</span></a></li>
+        <li><a href="#combo-models" data-tab="combo-models"><span class="nav-icon">03</span>Combo Models</a></li>
+        <li><a href="#clients" data-tab="clients"><span class="nav-icon">04</span>Clients</a></li>
+        <li><a href="#usage" data-tab="usage"><span class="nav-icon">05</span>Usage <span class="count">${recentErrorCount}</span></a></li>
+        <li><a href="#diagnostics" data-tab="diagnostics"><span class="nav-icon">06</span>Diagnostics</a></li>
+        <li><a href="#settings" data-tab="settings"><span class="nav-icon">07</span>Settings</a></li>
       </ul>
+      <div class="rf-sidebar-footer">
+        <strong>Safety posture</strong>
+        API-key routing only<br>
+        No OAuth token routing
+        <div style="margin-top:10px;">${localeSwitcher}</div>
+      </div>
     </aside>
     <main class="rf-main">
       <section id="tab-overview" class="tab-pane active" data-pane="overview">${overviewTab}</section>
       <section id="tab-providers" class="tab-pane" data-pane="providers">${providersTab}</section>
       <section id="tab-combo-models" class="tab-pane" data-pane="combo-models">${renderComboModelsTab(status)}</section>
       <section id="tab-clients" class="tab-pane" data-pane="clients">${renderClientsTab({ baseUrl, apiKeyHint, relayAuth: relayAuthState })}</section>
-      <section id="tab-routes" class="tab-pane" data-pane="routes">${routesTab}</section>
       <section id="tab-usage" class="tab-pane" data-pane="usage">${usageTab}</section>
-      <section id="tab-tools" class="tab-pane" data-pane="tools">${toolsTab}</section>
+      <section id="tab-diagnostics" class="tab-pane" data-pane="diagnostics">${diagnosticsTab}</section>
       <section id="tab-settings" class="tab-pane" data-pane="settings">${settingsTab}</section>
-      <section id="tab-ide" class="tab-pane" data-pane="ide">${renderIdeTab(status, port)}</section>
     </main>
   </div>
   <div id="profile-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
@@ -495,4 +374,97 @@ export function renderDashboard(status, port, options = {}) {
 </body>
 </html>`;
 }
+
+function renderDiagnosticsTab(ctx) {
+  const status = ctx.status || {};
+  const errors = Array.isArray(ctx.errors) ? ctx.errors : [];
+  const requests = Array.isArray(ctx.recentRequests) ? ctx.recentRequests : [];
+  const diagnosticPreview = [
+    "RelayForge diagnostic summary",
+    "---",
+    "Version: " + (status.version || "?"),
+    "Providers: " + ((status.providers && status.providers.length) || 0),
+    "Combo models: " + ((status.combos && status.combos.length) || 0),
+    "Recent requests: " + requests.length,
+    "Recent errors: " + errors.length,
+    "Safe to share. No full prompts, keys, cookies, or tokens."
+  ].join("\n");
+  const codexPreview = [
+    "RelayForge Codex diagnostics",
+    "---",
+    "Base URL: http://127.0.0.1:" + (ctx.port || 18765) + "/v1",
+    "Recommended model: smart-coding",
+    "Recent requests: " + requests.length,
+    "Errors: " + errors.length,
+    "Prompts: hidden by default"
+  ].join("\n");
+  const errorRows = errors.slice(0, 20).map((entry) => `<tr data-error-category="${escapeHtml(entry.category || entry.errorCategory || "unknown")}">
+    <td>${escapeHtml(formatTimestamp(entry.time || entry.timestamp))}</td>
+    <td><span class="err-cat ${escapeHtml(entry.category || entry.errorCategory || "other")}">${escapeHtml(entry.category || entry.errorCategory || "other")}</span></td>
+    <td>${escapeHtml(entry.provider || "-")}</td>
+    <td>${escapeHtml(String(entry.status || entry.statusCode || "-"))}</td>
+    <td>${escapeHtml(String(entry.message || entry.error || "")).slice(0, 180)}</td>
+  </tr>`).join("");
+  return `
+<div class="rf-page-head">
+  <div>
+    <h1 class="rf-page-title">Diagnostics</h1>
+    <p class="rf-page-desc">Troubleshoot RelayForge with redacted summaries, provider health cache, runtime key state, and error categories.</p>
+  </div>
+  <div class="rf-actions">
+    <button type="button" class="primary" id="copy-diagnostics">Copy diagnostic-summary</button>
+    <button type="button" id="copy-codex-diagnostics">Copy Codex diagnostics</button>
+  </div>
+</div>
+<div class="grid grid-2">
+  <div class="panel">
+    <div class="panel-title"><h3>Diagnostic Summary</h3><span class="pill ok">redacted</span></div>
+    <textarea id="diagnostic-summary" readonly>${escapeHtml(diagnosticPreview)}</textarea>
+  </div>
+  <div class="panel">
+    <div class="panel-title"><h3>Codex/OpenAI-compatible Diagnostics</h3><span class="pill ok">shareable</span></div>
+    <textarea id="codex-diagnostic-summary" readonly>${escapeHtml(codexPreview)}</textarea>
+  </div>
+</div>
+<details class="collapsible" open>
+  <summary>Provider Health Cache</summary>
+  <div class="scroll-x" style="margin-top:10px;">
+    <table><thead><tr><th>Provider</th><th>Result</th><th>Model</th><th>Status</th><th>Latency</th><th>Checked At</th></tr></thead>
+    <tbody>${ctx.healthRows || '<tr><td colspan="6" class="muted">No provider health checks yet</td></tr>'}</tbody></table>
+  </div>
+</details>
+<details class="collapsible">
+  <summary>Runtime Key Pool</summary>
+  <div class="scroll-x" style="margin-top:10px;">
+    <table><thead><tr><th>Provider</th><th>Key</th><th>Uses</th><th>Failures</th><th>Cooldown</th></tr></thead>
+    <tbody>${ctx.keyPoolRows || '<tr><td colspan="5" class="muted">No runtime key pool records</td></tr>'}</tbody></table>
+  </div>
+</details>
+<details class="collapsible" open>
+  <summary>Error Diagnostics</summary>
+  <div class="toolbar" style="margin-top:10px;">
+    ${["all","missing_key","connection_failed","upstream_429","upstream_5xx","timeout","auth_failed","unknown"].map((cat) => `<button type="button" class="small" data-filter-cat="${escapeHtml(cat)}"${cat === "all" ? ' data-filter-active="true"' : ""}>${escapeHtml(cat)}</button>`).join("")}
+  </div>
+  <div class="scroll-x" id="error-table-wrap">
+    <table><thead><tr><th>Time</th><th>Category</th><th>Provider</th><th>Status</th><th>Redacted message</th></tr></thead>
+    <tbody>${errorRows || '<tr><td colspan="5" class="muted">No errors recorded</td></tr>'}</tbody></table>
+  </div>
+</details>
+<details class="collapsible">
+  <summary>Environment Summary</summary>
+  <div class="grid grid-3" style="margin-top:10px;">
+    <div class="metric"><span class="label">Auth</span><span class="value">${status.relayAuth?.tokenRequired ? "On" : "Off"}</span><span class="sub">Token source is redacted</span></div>
+    <div class="metric"><span class="label">Runtime</span><span class="value">Node</span><span class="sub">Zero npm dependencies</span></div>
+    <div class="metric"><span class="label">Privacy</span><span class="value">Safe</span><span class="sub">Prompts hidden by default</span></div>
+  </div>
+</details>
+<details class="collapsible">
+  <summary>Advanced Internal State</summary>
+  <div class="grid grid-2" style="margin-top:10px;">
+    <div class="panel"><div class="panel-title"><h3>Balance Cache</h3></div><div class="scroll-x"><table><thead><tr><th>Provider</th><th>Result</th><th>Summary</th><th>Checked At</th></tr></thead><tbody>${ctx.balanceRows || '<tr><td colspan="4" class="muted">No balance checks yet</td></tr>'}</tbody></table></div></div>
+    <div class="panel"><div class="panel-title"><h3>Model Discovery Cache</h3></div><div class="scroll-x"><table><thead><tr><th>Provider</th><th>Result</th><th>Count</th><th>Models</th><th>Discovered At</th></tr></thead><tbody>${ctx.discoveryRows || '<tr><td colspan="5" class="muted">No model discovery cache</td></tr>'}</tbody></table></div></div>
+  </div>
+</details>`;
+}
+
 

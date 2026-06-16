@@ -1,0 +1,1404 @@
+﻿{
+  "ok": true,
+  "version": "0.1.1",
+  "startedAt": "2026-06-11T11:51:02.327Z",
+  "configPath": "D:\\ai_agent\\opencode_program\\openrelay-like\\config.json",
+  "statePath": "D:\\ai_agent\\opencode_program\\openrelay-like\\data\\runtime-state.json",
+  "providers": [
+    {
+      "name": "ollama",
+      "displayName": "",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": true,
+      "healthHint": "鏈湴 provider锛氬鏋滆繛閫氭祴璇曞け璐ワ紝閫氬父鏄?Ollama銆丩M Studio銆乿LLM 鎴?llama.cpp 鏈嶅姟鏈惎鍔紝鎴栫鍙?baseURL 涓嶄竴鑷淬€?,
+      "keyCount": 1,
+      "models": [
+        "qwen2.5:7b",
+        "llama3.1:8b"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "lm-studio",
+      "displayName": "",
+      "baseUrl": "http://127.0.0.1:1234/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": true,
+      "healthHint": "鏈湴 provider锛氬鏋滆繛閫氭祴璇曞け璐ワ紝閫氬父鏄?Ollama銆丩M Studio銆乿LLM 鎴?llama.cpp 鏈嶅姟鏈惎鍔紝鎴栫鍙?baseURL 涓嶄竴鑷淬€?,
+      "keyCount": 1,
+      "models": [
+        "local-model"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "vllm",
+      "displayName": "",
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": true,
+      "healthHint": "鏈湴 provider锛氬鏋滆繛閫氭祴璇曞け璐ワ紝閫氬父鏄?Ollama銆丩M Studio銆乿LLM 鎴?llama.cpp 鏈嶅姟鏈惎鍔紝鎴栫鍙?baseURL 涓嶄竴鑷淬€?,
+      "keyCount": 1,
+      "models": [
+        "local-model"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "llama-cpp",
+      "displayName": "",
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": true,
+      "healthHint": "鏈湴 provider锛氬鏋滆繛閫氭祴璇曞け璐ワ紝閫氬父鏄?Ollama銆丩M Studio銆乿LLM 鎴?llama.cpp 鏈嶅姟鏈惎鍔紝鎴栫鍙?baseURL 涓嶄竴鑷淬€?,
+      "keyCount": 1,
+      "models": [
+        "local-model"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "llamafile",
+      "displayName": "",
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": true,
+      "healthHint": "鏈湴 provider锛氬鏋滆繛閫氭祴璇曞け璐ワ紝閫氬父鏄?Ollama銆丩M Studio銆乿LLM 鎴?llama.cpp 鏈嶅姟鏈惎鍔紝鎴栫鍙?baseURL 涓嶄竴鑷淬€?,
+      "keyCount": 1,
+      "models": [
+        "local-model"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "deepseek",
+      "displayName": "",
+      "baseUrl": "https://api.deepseek.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "DEEPSEEK_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "openai",
+      "displayName": "",
+      "baseUrl": "https://api.openai.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "OPENAI_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "gpt-4.1-mini",
+        "gpt-4o-mini"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "moonshot",
+      "displayName": "",
+      "baseUrl": "https://api.moonshot.cn/v1",
+      "apiFormat": "openai",
+      "keyEnv": "MOONSHOT_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "moonshot-v1-8k",
+        "moonshot-v1-32k"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "anthropic",
+      "displayName": "",
+      "baseUrl": "https://api.anthropic.com/v1",
+      "apiFormat": "anthropic",
+      "keyEnv": "ANTHROPIC_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "claude-3-5-haiku-latest",
+        "claude-sonnet-4-20250514"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "groq",
+      "displayName": "",
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "GROQ_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "openrouter",
+      "displayName": "",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "apiFormat": "openai",
+      "keyEnv": "OPENROUTER_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "openrouter/auto",
+        "deepseek/deepseek-chat-v3-0324"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "gemini",
+      "displayName": "",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "apiFormat": "openai",
+      "keyEnv": "GEMINI_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "gemini-2.0-flash",
+        "gemini-1.5-flash"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "mistral",
+      "displayName": "",
+      "baseUrl": "https://api.mistral.ai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "MISTRAL_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "mistral-small-latest",
+        "codestral-latest"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "siliconflow",
+      "displayName": "",
+      "baseUrl": "https://api.siliconflow.cn/v1",
+      "apiFormat": "openai",
+      "keyEnv": "SILICONFLOW_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "deepseek-ai/DeepSeek-V3"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "zhipu",
+      "displayName": "",
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+      "apiFormat": "openai",
+      "keyEnv": "ZHIPU_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "glm-4-flash",
+        "glm-4-plus"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "cohere",
+      "displayName": "",
+      "baseUrl": "https://api.cohere.com/compatibility/v1",
+      "apiFormat": "openai",
+      "keyEnv": "COHERE_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "command-r-plus",
+        "command-r"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "xai",
+      "displayName": "",
+      "baseUrl": "https://api.x.ai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "XAI_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "grok-2-latest",
+        "grok-2-mini"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "together",
+      "displayName": "",
+      "baseUrl": "https://api.together.xyz/v1",
+      "apiFormat": "openai",
+      "keyEnv": "TOGETHER_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "Qwen/Qwen2.5-7B-Instruct-Turbo"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "volcengine-codingplan",
+      "displayName": "Volcengine (codingplan)",
+      "baseUrl": "https://ark.cn-beijing.volces.com/api/coding/v3",
+      "apiFormat": "openai",
+      "keyEnv": "VOLCENGINE_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "doubao-seed-code",
+        "doubao-seed-2.0-code",
+        "doubao-seed-2.0-pro",
+        "doubao-seed-2.0-lite",
+        "minimax-m2.7",
+        "glm-5.1",
+        "kimi-k2.6",
+        "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "minimax-m3"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "moonshot_coding_plan",
+      "displayName": "moonshot_coding_plan",
+      "baseUrl": "https://api.kimi.com/coding/v1",
+      "apiFormat": "openai",
+      "keyEnv": "MOONSHOT_API_KEYS",
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 0,
+      "models": [
+        "kimi-for-coding"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    },
+    {
+      "name": "opencode",
+      "displayName": "opencode",
+      "baseUrl": "https://opencode.ai/zen/go/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "allowInsecureHttp": false,
+      "insecureHttpRisk": false,
+      "local": false,
+      "healthHint": "浜戠鎴栬繙绋?provider锛氳繛閫氭祴璇曞彲鑳芥秷鑰椾笂娓搁搴︼紝璇峰彧鍦ㄩ渶瑕佹椂鎵嬪姩瑙﹀彂銆?,
+      "keyCount": 1,
+      "models": [
+        "deepseek-v4-flash"
+      ],
+      "extraHeaders": null,
+      "balanceEndpoint": null
+    }
+  ],
+  "routes": [
+    {
+      "name": "coding-local",
+      "description": "Prefer owned coding APIs, then fall back to local Ollama",
+      "strategy": "fallback",
+      "limits": {
+        "dailyRequests": null
+      },
+      "candidates": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-chat",
+          "weight": 3
+        },
+        {
+          "provider": "moonshot",
+          "model": "moonshot-v1-8k",
+          "weight": 1
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "offline-local",
+      "description": "Use local models only",
+      "strategy": "round_robin",
+      "limits": {
+        "dailyRequests": null
+      },
+      "candidates": [
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        },
+        {
+          "provider": "ollama",
+          "model": "llama3.1:8b",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "unlimited-local",
+      "description": "Local Ollama-only route; the local relay does not actively limit call count, but upstream limits still apply",
+      "strategy": "round_robin",
+      "limits": {
+        "dailyRequests": null
+      },
+      "candidates": [
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        },
+        {
+          "provider": "ollama",
+          "model": "llama3.1:8b",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "balanced-local",
+      "description": "Weighted route across configured providers",
+      "strategy": "weighted",
+      "limits": {
+        "dailyRequests": null
+      },
+      "candidates": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-chat",
+          "weight": 5
+        },
+        {
+          "provider": "moonshot",
+          "model": "moonshot-v1-8k",
+          "weight": 2
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "free-api-pool",
+      "description": "Manual BYOK route for providers with free tiers",
+      "strategy": "weighted",
+      "limits": {
+        "dailyRequests": null
+      },
+      "candidates": [
+        {
+          "provider": "groq",
+          "model": "llama-3.1-8b-instant",
+          "weight": 4
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-2.0-flash",
+          "weight": 3
+        },
+        {
+          "provider": "siliconflow",
+          "model": "Qwen/Qwen2.5-7B-Instruct",
+          "weight": 2
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "routeReferences": {
+    "coding-local": [
+      {
+        "type": "profile",
+        "name": "coding"
+      }
+    ],
+    "offline-local": [],
+    "unlimited-local": [
+      {
+        "type": "profile",
+        "name": "local-only"
+      }
+    ],
+    "balanced-local": [],
+    "free-api-pool": [
+      {
+        "type": "profile",
+        "name": "free-tier-pool"
+      }
+    ]
+  },
+  "routeTemplates": [
+    {
+      "name": "coding-local",
+      "description": "Prefer owned coding APIs, then fall back to local Ollama",
+      "strategy": "fallback",
+      "candidates": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-chat",
+          "weight": 3
+        },
+        {
+          "provider": "moonshot",
+          "model": "moonshot-v1-8k",
+          "weight": 1
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "offline-local",
+      "description": "Use local models only",
+      "strategy": "round_robin",
+      "candidates": [
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b"
+        },
+        {
+          "provider": "ollama",
+          "model": "llama3.1:8b"
+        }
+      ]
+    },
+    {
+      "name": "balanced-local",
+      "description": "Weighted route across configured providers",
+      "strategy": "weighted",
+      "candidates": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-chat",
+          "weight": 5
+        },
+        {
+          "provider": "moonshot",
+          "model": "moonshot-v1-8k",
+          "weight": 2
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "name": "free-api-pool",
+      "description": "Manual BYOK route for providers with free tiers",
+      "strategy": "weighted",
+      "candidates": [
+        {
+          "provider": "groq",
+          "model": "llama-3.1-8b-instant",
+          "weight": 4
+        },
+        {
+          "provider": "gemini",
+          "model": "gemini-2.0-flash",
+          "weight": 3
+        },
+        {
+          "provider": "siliconflow",
+          "model": "Qwen/Qwen2.5-7B-Instruct",
+          "weight": 2
+        },
+        {
+          "provider": "ollama",
+          "model": "qwen2.5:7b",
+          "weight": 1
+        }
+      ]
+    }
+  ],
+  "profiles": {
+    "activeProfile": "coding",
+    "defaultModel": "coding-local",
+    "profiles": [
+      {
+        "name": "local-only",
+        "description": "Use local Ollama models only; no cloud key required",
+        "defaultModel": "unlimited-local",
+        "active": false
+      },
+      {
+        "name": "coding",
+        "description": "Prefer coding APIs, then fall back to local Ollama",
+        "defaultModel": "coding-local",
+        "active": true
+      },
+      {
+        "name": "free-tier-pool",
+        "description": "Use configured free-tier or BYOK providers with local fallback",
+        "defaultModel": "free-api-pool",
+        "active": false
+      }
+    ]
+  },
+  "stats": {
+    "startedAt": "2026-06-11T11:51:02.327Z",
+    "requests": 0,
+    "proxied": 0,
+    "failures": 2,
+    "localLimitHits": 0,
+    "upstreamAttempts": 0,
+    "byProvider": {}
+  },
+  "usage": {
+    "day": "2026-06-11",
+    "daily": {
+      "total": 0,
+      "routes": {},
+      "providers": {},
+      "models": {}
+    },
+    "history": [
+      {
+        "day": "2026-06-11",
+        "total": 0,
+        "routes": {},
+        "providers": {},
+        "models": {}
+      }
+    ],
+    "historyDays": 14,
+    "runtime": {
+      "byRoute": {},
+      "byModel": {},
+      "byProvider": {}
+    },
+    "metrics": {
+      "byRoute": {},
+      "byProvider": {},
+      "byModel": {}
+    },
+    "limits": {
+      "dailyRequests": null,
+      "routes": {},
+      "providers": {}
+    }
+  },
+  "healthCache": {
+    "deepseek": {
+      "ok": true,
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "status": 200,
+      "elapsedMs": 994,
+      "body": "ok",
+      "checkedAt": "2026-06-10T08:59:57.239Z"
+    },
+    "volcengine-codingplan": {
+      "ok": true,
+      "provider": "volcengine-codingplan",
+      "model": "doubao-seed-code",
+      "status": 200,
+      "elapsedMs": 4490,
+      "body": "ok",
+      "checkedAt": "2026-06-10T16:47:31.461Z"
+    },
+    "moonshot_coding_plan": {
+      "ok": false,
+      "provider": "moonshot_coding_plan",
+      "model": "kimi-for-coding",
+      "status": 402,
+      "elapsedMs": 127,
+      "body": {
+        "error": {
+          "message": "We're unable to verify your membership benefits at this time. Please ensure your membership is active.",
+          "type": "invalid_request_error"
+        }
+      },
+      "checkedAt": "2026-06-11T00:48:56.242Z"
+    },
+    "opencode": {
+      "ok": true,
+      "provider": "opencode",
+      "model": "deepseek-v4-flash",
+      "status": 200,
+      "elapsedMs": 1926,
+      "body": "ok",
+      "checkedAt": "2026-06-11T00:51:13.833Z"
+    }
+  },
+  "modelDiscoveryCache": {},
+  "balanceCache": {
+    "deepseek": {
+      "ok": false,
+      "provider": "deepseek",
+      "error": "balance_endpoint_not_configured",
+      "message": "Configure a public balanceEndpoint { url, method?, headers? } on this provider to enable read-only balance lookup.",
+      "checkedAt": "2026-06-10T09:00:05.696Z"
+    },
+    "moonshot_coding_plan": {
+      "ok": false,
+      "provider": "moonshot_coding_plan",
+      "error": "balance_endpoint_not_configured",
+      "checkedAt": "2026-06-11T00:49:06.908Z"
+    }
+  },
+  "recentErrors": [
+    {
+      "at": "2026-06-10T08:59:57.850Z",
+      "scope": "server",
+      "category": "upstream_request_failed",
+      "error": "classifyErrorCounts is not defined"
+    },
+    {
+      "at": "2026-06-10T08:59:37.967Z",
+      "scope": "server",
+      "category": "upstream_request_failed",
+      "error": "classifyErrorCounts is not defined"
+    }
+  ],
+  "providerHealth": {},
+  "healthChecks": {
+    "enabled": false,
+    "intervalMinutes": 60,
+    "providers": []
+  },
+  "keys": {
+    "ollama": [
+      {
+        "label": "no-auth",
+        "hash": "no-auth",
+        "source": "no-auth",
+        "sourceId": null,
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "lm-studio": [
+      {
+        "label": "no-auth",
+        "hash": "no-auth",
+        "source": "no-auth",
+        "sourceId": null,
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "vllm": [
+      {
+        "label": "no-auth",
+        "hash": "no-auth",
+        "source": "no-auth",
+        "sourceId": null,
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "llama-cpp": [
+      {
+        "label": "no-auth",
+        "hash": "no-auth",
+        "source": "no-auth",
+        "sourceId": null,
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "llamafile": [
+      {
+        "label": "no-auth",
+        "hash": "no-auth",
+        "source": "no-auth",
+        "sourceId": null,
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "deepseek": [
+      {
+        "label": "f1897238ee39",
+        "hash": "f1897238ee39",
+        "source": "web",
+        "sourceId": "key_b8f05930de20bff6",
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "openai": [],
+    "moonshot": [],
+    "anthropic": [],
+    "groq": [],
+    "openrouter": [],
+    "gemini": [],
+    "mistral": [],
+    "siliconflow": [],
+    "zhipu": [],
+    "cohere": [],
+    "xai": [],
+    "together": [],
+    "volcengine-codingplan": [
+      {
+        "label": "8ec2d9945cca",
+        "hash": "8ec2d9945cca",
+        "source": "web",
+        "sourceId": "key_21324a971d7ffc7c",
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "moonshot_coding_plan": [
+      {
+        "label": "88cddef1a84f",
+        "hash": "88cddef1a84f",
+        "source": "web",
+        "sourceId": "key_2db6bb0c1c87a7c7",
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ],
+    "opencode": [
+      {
+        "label": "ebbcd8b79eaf",
+        "hash": "ebbcd8b79eaf",
+        "source": "web",
+        "sourceId": "key_5f6a10ae2bc87706",
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      },
+      {
+        "label": "no-auth",
+        "hash": "no-auth",
+        "source": "no-auth",
+        "sourceId": null,
+        "uses": 0,
+        "failures": 0,
+        "coolingDown": false,
+        "cooldownUntil": null
+      }
+    ]
+  },
+  "webKeys": [
+    {
+      "id": "key_b8f05930de20bff6",
+      "provider": "deepseek",
+      "label": "",
+      "hash": "f1897238ee39",
+      "masked": "sk-fb5...e475",
+      "enabled": true,
+      "createdAt": "2026-06-10T08:59:37.303Z",
+      "updatedAt": "2026-06-10T08:59:37.303Z",
+      "lastUsedAt": "2026-06-10T08:59:51.406Z",
+      "lastTestAt": "2026-06-10T08:59:57.239Z",
+      "lastTestResult": {
+        "ok": true,
+        "status": 200,
+        "elapsedMs": 994,
+        "error": null,
+        "message": null
+      },
+      "source": "web"
+    },
+    {
+      "id": "key_21324a971d7ffc7c",
+      "provider": "volcengine-codingplan",
+      "label": "",
+      "hash": "8ec2d9945cca",
+      "masked": "ark-0e...7c72",
+      "enabled": true,
+      "createdAt": "2026-06-10T16:47:26.959Z",
+      "updatedAt": "2026-06-10T16:47:26.959Z",
+      "lastUsedAt": null,
+      "lastTestAt": null,
+      "lastTestResult": null,
+      "source": "web"
+    },
+    {
+      "id": "key_2db6bb0c1c87a7c7",
+      "provider": "moonshot_coding_plan",
+      "label": "",
+      "hash": "88cddef1a84f",
+      "masked": "sk-kim...S5TW",
+      "enabled": true,
+      "createdAt": "2026-06-11T00:48:45.802Z",
+      "updatedAt": "2026-06-11T00:48:45.802Z",
+      "lastUsedAt": "2026-06-11T00:48:56.115Z",
+      "lastTestAt": null,
+      "lastTestResult": null,
+      "source": "web"
+    },
+    {
+      "id": "key_5f6a10ae2bc87706",
+      "provider": "opencode",
+      "label": "",
+      "hash": "ebbcd8b79eaf",
+      "masked": "sk-sqL...QqKg",
+      "enabled": true,
+      "createdAt": "2026-06-11T00:51:11.878Z",
+      "updatedAt": "2026-06-11T00:51:11.878Z",
+      "lastUsedAt": null,
+      "lastTestAt": null,
+      "lastTestResult": null,
+      "source": "web"
+    }
+  ],
+  "secretStore": {
+    "masterKeyOnDisk": true,
+    "masterKeyInEnv": false
+  },
+  "providerTemplates": [
+    {
+      "name": "openai",
+      "displayName": "OpenAI",
+      "baseUrl": "https://api.openai.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "OPENAI_API_KEYS",
+      "models": [
+        "gpt-4.1-mini",
+        "gpt-4o-mini"
+      ]
+    },
+    {
+      "name": "anthropic",
+      "displayName": "Anthropic",
+      "baseUrl": "https://api.anthropic.com/v1",
+      "apiFormat": "anthropic",
+      "keyEnv": "ANTHROPIC_API_KEYS",
+      "models": [
+        "claude-3-5-haiku-latest",
+        "claude-sonnet-4-20250514"
+      ]
+    },
+    {
+      "name": "deepseek",
+      "displayName": "DeepSeek",
+      "baseUrl": "https://api.deepseek.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "DEEPSEEK_API_KEYS",
+      "models": [
+        "deepseek-chat",
+        "deepseek-reasoner"
+      ],
+      "balanceEndpoint": {
+        "url": "https://api.deepseek.com/v1/user/balance",
+        "method": "GET",
+        "useKey": true,
+        "fieldMap": {
+          "remaining": "balance_infos[0].currency_balance",
+          "limit": "balance_infos[0].total_balance",
+          "used": "balance_infos[0].granted_balance",
+          "currency": "balance_infos[0].currency"
+        }
+      }
+    },
+    {
+      "name": "gemini",
+      "displayName": "Gemini (OpenAI-compatible)",
+      "baseUrl": "https://generativelanguage.googleapis.com/v1beta/openai",
+      "apiFormat": "openai",
+      "keyEnv": "GEMINI_API_KEYS",
+      "models": [
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite"
+      ]
+    },
+    {
+      "name": "groq",
+      "displayName": "Groq",
+      "baseUrl": "https://api.groq.com/openai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "GROQ_API_KEYS",
+      "models": [
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile"
+      ]
+    },
+    {
+      "name": "openrouter",
+      "displayName": "OpenRouter",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "apiFormat": "openai",
+      "keyEnv": "OPENROUTER_API_KEYS",
+      "models": [
+        "openrouter/auto",
+        "deepseek/deepseek-chat-v3-0324"
+      ]
+    },
+    {
+      "name": "mistral",
+      "displayName": "Mistral",
+      "baseUrl": "https://api.mistral.ai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "MISTRAL_API_KEYS",
+      "models": [
+        "mistral-small-latest",
+        "codestral-latest"
+      ]
+    },
+    {
+      "name": "siliconflow",
+      "displayName": "SiliconFlow",
+      "baseUrl": "https://api.siliconflow.cn/v1",
+      "apiFormat": "openai",
+      "keyEnv": "SILICONFLOW_API_KEYS",
+      "models": [
+        "Qwen/Qwen2.5-7B-Instruct",
+        "deepseek-ai/DeepSeek-V3"
+      ]
+    },
+    {
+      "name": "zhipu",
+      "displayName": "鏅鸿氨 GLM",
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
+      "apiFormat": "openai",
+      "keyEnv": "ZHIPU_API_KEYS",
+      "models": [
+        "glm-4-flash",
+        "glm-4-plus"
+      ]
+    },
+    {
+      "name": "cohere",
+      "displayName": "Cohere",
+      "baseUrl": "https://api.cohere.com/compatibility/v1",
+      "apiFormat": "openai",
+      "keyEnv": "COHERE_API_KEYS",
+      "models": [
+        "command-r-plus",
+        "command-r"
+      ]
+    },
+    {
+      "name": "xai",
+      "displayName": "xAI (Grok)",
+      "baseUrl": "https://api.x.ai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "XAI_API_KEYS",
+      "models": [
+        "grok-3",
+        "grok-3-mini"
+      ]
+    },
+    {
+      "name": "together",
+      "displayName": "Together AI",
+      "baseUrl": "https://api.together.xyz/v1",
+      "apiFormat": "openai",
+      "keyEnv": "TOGETHER_API_KEYS",
+      "models": [
+        "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "Qwen/Qwen2.5-7B-Instruct-Turbo"
+      ]
+    },
+    {
+      "name": "ollama",
+      "displayName": "Ollama",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "models": [
+        "qwen2.5:7b",
+        "llama3.1:8b"
+      ]
+    },
+    {
+      "name": "lm-studio",
+      "displayName": "LM Studio",
+      "baseUrl": "http://127.0.0.1:1234/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "models": [
+        "local-model"
+      ]
+    },
+    {
+      "name": "vllm",
+      "displayName": "vLLM",
+      "baseUrl": "http://127.0.0.1:8000/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "models": [
+        "local-model"
+      ]
+    },
+    {
+      "name": "llama-cpp",
+      "displayName": "llama.cpp server",
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "models": [
+        "local-model"
+      ]
+    },
+    {
+      "name": "llamafile",
+      "displayName": "llamafile",
+      "baseUrl": "http://127.0.0.1:8080/v1",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "models": [
+        "local-model"
+      ]
+    },
+    {
+      "name": "cerebras",
+      "displayName": "Cerebras",
+      "baseUrl": "https://api.cerebras.ai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "CEREBRAS_API_KEYS",
+      "models": [
+        "llama-3.3-70b",
+        "llama-3.1-8b",
+        "qwen-3-32b"
+      ]
+    },
+    {
+      "name": "sambanova",
+      "displayName": "SambaNova",
+      "baseUrl": "https://api.sambanova.ai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "SAMBANOVA_API_KEYS",
+      "models": [
+        "Meta-Llama-3.3-70B-Instruct",
+        "Meta-Llama-3.1-8B-Instruct"
+      ]
+    },
+    {
+      "name": "longcat",
+      "displayName": "LongCat (Meituan)",
+      "baseUrl": "https://api.longcat.chat/v1",
+      "apiFormat": "openai",
+      "keyEnv": "LONGCAT_API_KEYS",
+      "models": [
+        "longcat-128k-chat",
+        "longcat-pro"
+      ]
+    },
+    {
+      "name": "dashscope",
+      "displayName": "DashScope (Alibaba Cloud)",
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "apiFormat": "openai",
+      "keyEnv": "DASHSCOPE_API_KEYS",
+      "models": [
+        "qwen-plus",
+        "qwen-turbo",
+        "qwen-coder-plus",
+        "qwen-max"
+      ]
+    },
+    {
+      "name": "nvidia-nim",
+      "displayName": "NVIDIA NIM",
+      "baseUrl": "https://integrate.api.nvidia.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "NVIDIA_API_KEYS",
+      "models": [
+        "meta/llama-3.1-70b-instruct",
+        "nvidia/llama-3.1-nemotron-70b-instruct"
+      ]
+    },
+    {
+      "name": "github-models",
+      "displayName": "GitHub Models",
+      "baseUrl": "https://models.inference.ai.azure.com",
+      "apiFormat": "openai",
+      "keyEnv": "GITHUB_MODELS_TOKEN",
+      "models": [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "Phi-3.5-mini-instruct"
+      ]
+    },
+    {
+      "name": "fireworks",
+      "displayName": "Fireworks",
+      "baseUrl": "https://api.fireworks.ai/inference/v1",
+      "apiFormat": "openai",
+      "keyEnv": "FIREWORKS_API_KEYS",
+      "models": [
+        "accounts/fireworks/models/llama-v3p3-70b-instruct",
+        "accounts/fireworks/models/deepseek-v3"
+      ]
+    },
+    {
+      "name": "volcengine",
+      "displayName": "Volcengine (Doubao)",
+      "baseUrl": "https://ark.cn-beijing.volces.com/api/v3",
+      "apiFormat": "openai",
+      "keyEnv": "VOLCENGINE_API_KEYS",
+      "models": [
+        "doubao-pro-32k",
+        "doubao-lite-32k",
+        "doubao-1-5-pro-32k-250115"
+      ]
+    },
+    {
+      "name": "qianfan",
+      "displayName": "Qianfan (Baidu)",
+      "baseUrl": "https://qianfan.baidubce.com/v2",
+      "apiFormat": "openai",
+      "keyEnv": "QIANFAN_API_KEYS",
+      "models": [
+        "ernie-4.5-8k",
+        "ernie-3.5-8k",
+        "ernie-speed-128k"
+      ]
+    },
+    {
+      "name": "qiniu",
+      "displayName": "Qiniu AI",
+      "baseUrl": "https://api.qnaigc.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "QINIU_API_KEYS",
+      "models": [
+        "qwen2.5-72b-instruct",
+        "deepseek-v3"
+      ]
+    },
+    {
+      "name": "hunyuan",
+      "displayName": "Hunyuan (Tencent)",
+      "baseUrl": "https://api.hunyuan.tencent.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "HUNYUAN_API_KEYS",
+      "models": [
+        "hunyuan-pro",
+        "hunyuan-standard",
+        "hunyuan-turbo"
+      ]
+    },
+    {
+      "name": "cloudflare-ai",
+      "displayName": "Cloudflare AI Gateway",
+      "baseUrl": "https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/openai/v1",
+      "apiFormat": "openai",
+      "keyEnv": "CLOUDFLARE_API_KEYS",
+      "models": [
+        "@cf/meta/llama-3.1-8b-instruct",
+        "@cf/mistral/mistral-7b-instruct-v0.1"
+      ]
+    },
+    {
+      "name": "huggingface",
+      "displayName": "Hugging Face (router)",
+      "baseUrl": "https://router.huggingface.co/v1",
+      "apiFormat": "openai",
+      "keyEnv": "HUGGINGFACE_API_KEYS",
+      "models": [
+        "meta-llama/Llama-3.3-70B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct"
+      ]
+    },
+    {
+      "name": "moonshot",
+      "displayName": "Moonshot",
+      "baseUrl": "https://api.moonshot.cn/v1",
+      "apiFormat": "openai",
+      "keyEnv": "MOONSHOT_API_KEYS",
+      "models": [
+        "moonshot-v1-8k",
+        "moonshot-v1-32k"
+      ]
+    },
+    {
+      "name": "baichuan",
+      "displayName": "Baichuan",
+      "baseUrl": "https://api.baichuan-ai.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "BAICHUAN_API_KEYS",
+      "models": [
+        "Baichuan4",
+        "Baichuan3-Turbo"
+      ]
+    },
+    {
+      "name": "stepfun",
+      "displayName": "Stepfun (闃惰穬鏄熻景)",
+      "baseUrl": "https://api.stepfun.com/v1",
+      "apiFormat": "openai",
+      "keyEnv": "STEPFUN_API_KEYS",
+      "models": [
+        "step-2-16k",
+        "step-1-8k"
+      ]
+    },
+    {
+      "name": "minimax",
+      "displayName": "MiniMax",
+      "baseUrl": "https://api.minimax.chat/v1",
+      "apiFormat": "openai",
+      "keyEnv": "MINIMAX_API_KEYS",
+      "models": [
+        "MiniMax-M2.7",
+        "MiniMax-M1"
+      ]
+    },
+    {
+      "name": "pollinations",
+      "displayName": "Pollinations AI",
+      "baseUrl": "https://text.pollinations.ai/openai",
+      "apiFormat": "openai",
+      "keyEnv": null,
+      "models": [
+        "openai",
+        "openai-large",
+        "openai-reasoning",
+        "mistral",
+        "llama",
+        "qwen-coder"
+      ]
+    },
+    {
+      "name": "azure-openai",
+      "displayName": "Azure OpenAI",
+      "baseUrl": "https://<resource>.openai.azure.com",
+      "apiFormat": "openai",
+      "keyEnv": "AZURE_OPENAI_API_KEYS",
+      "models": [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-4-turbo"
+      ]
+    },
+    {
+      "name": "anthropic-direct",
+      "displayName": "Anthropic Direct API",
+      "baseUrl": "https://api.anthropic.com/v1",
+      "apiFormat": "anthropic",
+      "keyEnv": "ANTHROPIC_API_KEYS",
+      "models": [
+        "claude-sonnet-4-20250514",
+        "claude-3-5-haiku-latest",
+        "claude-3-opus-latest"
+      ]
+    }
+  ],
+  "relayAuth": {
+    "tokenRequired": true,
+    "allowNoAuth": false,
+    "apiKeyHint": "zengjie",
+    "apiKeyMasked": "zengjie",
+    "tokenSource": "env"
+  }
+}
+

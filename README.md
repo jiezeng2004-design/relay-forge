@@ -1,11 +1,11 @@
-# RelayForge v0.1.0
+﻿# RelayForge v0.3.0
 
-**Zero-dependency local-first AI coding gateway** — OpenAI / Anthropic compatible.
+**Zero-dependency local-first AI coding gateway** 鈥?OpenAI / Anthropic compatible.
 Unify your local (Ollama / LM Studio) and cloud API providers behind `http://127.0.0.1:18765/v1` with combo routing,
 fallback, request privacy, and lightweight usage analytics.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
@@ -15,7 +15,7 @@ fallback, request privacy, and lightweight usage analytics.
 
 AI coding tools (Codex, opencode, Claude Code, CC Switch, Cline) need access to multiple LLM providers.
 Managing API keys, rate limits, fallback behavior, and privacy across every tool is painful.
-RelayForge gives you a single local endpoint that handles it all — with zero npm dependencies.
+RelayForge gives you a single local endpoint that handles it all 鈥?with zero npm dependencies.
 
 ```mermaid
 flowchart LR
@@ -32,21 +32,22 @@ flowchart LR
 
 ## Features
 
-- **Zero dependencies** — runs on Node.js built-ins only
-- **Local-first** — binds to `127.0.0.1` by default, no telemetry, no cloud lock-in
-- **OpenAI / Anthropic compatible** — `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, `/v1/models`
-- **Combo models** — virtual model names that combine multiple providers with fallback / round_robin / weighted_round_robin
-- **Smart fallback** — 429/503/timeout triggers cascade to the next candidate
-- **Privacy by default** — prompts are never logged; API keys are redacted
-- **Recent requests** — last 20 request metadata (model, provider, latency, status) without prompt content
-- **Provider registry** — capability-based provider queries (`openai_chat`, `anthropic_messages`, `streaming`, `tools`...)
-- **No OAuth subscription tokens** — RelayForge does not read or forward Claude Code / Codex / Cursor personal tokens
+- **Premium Dashboard UX** - v0.3.0 adds screenshot-ready Overview, Providers, Combo Models, Clients, Usage, Diagnostics, and Settings pages with light/dark/system appearance support.
+- **Zero dependencies** 鈥?runs on Node.js built-ins only
+- **Local-first** 鈥?binds to `127.0.0.1` by default, no telemetry, no cloud lock-in
+- **OpenAI / Anthropic compatible** 鈥?`/v1/chat/completions`, `/v1/messages`, `/v1/responses`, `/v1/models`
+- **Combo models** 鈥?virtual model names that combine multiple providers with fallback / round_robin / weighted_round_robin
+- **Smart fallback** 鈥?429/503/timeout triggers cascade to the next candidate
+- **Privacy by default** 鈥?prompts are never logged; API keys are redacted
+- **Recent requests** 鈥?last 20 request metadata (model, provider, latency, status) without prompt content
+- **Provider registry** 鈥?capability-based provider queries (`openai_chat`, `anthropic_messages`, `streaming`, `tools`...)
+- **No OAuth subscription tokens** 鈥?RelayForge does not read or forward Claude Code / Codex / Cursor personal tokens
 
 ## Quick Start
 
 ### A. Windows zip users
 
-1. Unzip `relayforge-0.1.0.zip`
+1. Unzip `relayforge-0.3.0.zip`
 2. Double-click **`Start_RelayForge.cmd`**
 3. Open http://127.0.0.1:18765 in your browser
 4. Copy the token from the startup log
@@ -224,11 +225,11 @@ Prompts are never stored in dashboard logs by default.
 
 | Variable | Recommended | Legacy (backward compat) |
 |----------|-------------|-------------------------|
-| `RELAYFORGE_TOKEN` | ✅ Token for /v1/* and /admin/* | `RELAY_TOKEN` / `OPENRELAY_TOKEN` |
-| `RELAYFORGE_CONFIG` | ✅ Custom config path | `OPENRELAY_CONFIG` |
-| `RELAYFORGE_STATE` | ✅ Custom state path | `OPENRELAY_STATE` |
-| `RELAYFORGE_PORT` | ✅ Port override | `PORT` / `OPENRELAY_PORT` |
-| `RELAYFORGE_ALLOW_NO_AUTH` | ✅ Disable auth (dev only) | `OPENRELAY_ALLOW_NO_AUTH` |
+| `RELAYFORGE_TOKEN` | 鉁?Token for /v1/* and /admin/* | `RELAY_TOKEN` / `OPENRELAY_TOKEN` |
+| `RELAYFORGE_CONFIG` | 鉁?Custom config path | `OPENRELAY_CONFIG` |
+| `RELAYFORGE_STATE` | 鉁?Custom state path | `OPENRELAY_STATE` |
+| `RELAYFORGE_PORT` | 鉁?Port override | `PORT` / `OPENRELAY_PORT` |
+| `RELAYFORGE_ALLOW_NO_AUTH` | 鉁?Disable auth (dev only) | `OPENRELAY_ALLOW_NO_AUTH` |
 
 If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedence.
 
@@ -237,22 +238,23 @@ If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedenc
 | | RelayForge | LiteLLM | One API | 9Router |
 |---|---|---|---|---|
 | Dependencies | **Zero npm** | Heavy | Heavy | Heavy |
-| Local-first | ✅ | ❌ | ❌ | ❌ |
-| OAuth token routing | ❌ | ❌ | ❌ | ✅ |
-| Combo models | ✅ | ✅ | ❌ | ✅ |
-| Privacy logs | ✅ | ❌ | ❌ | ❌ |
-| MIT License | ✅ | ✅ | ✅ | ✅ |
+| Local-first | 鉁?| 鉂?| 鉂?| 鉂?|
+| OAuth token routing | 鉂?| 鉂?| 鉂?| 鉁?|
+| Combo models | 鉁?| 鉁?| 鉂?| 鉁?|
+| Privacy logs | 鉁?| 鉂?| 鉂?| 鉂?|
+| MIT License | 鉁?| 鉁?| 鉁?| 鉁?|
 
 ## Roadmap
 
-**v0.1.x** — Polish docs, screenshots, demo GIFs, client setup guides, CI stabilization
+**v0.1.x** 鈥?Polish docs, screenshots, demo GIFs, client setup guides, CI stabilization
 
-**v0.2.x** — Better dashboard UX, provider health page, config import/export, config validation UI, token/cost estimation
+**v0.2.x** 鈥?Better dashboard UX, provider health page, config import/export, config validation UI, token/cost estimation
 
-**v0.3.x** — Plugin-like provider templates, more AI coding client presets, optional local encrypted secrets, Docker support
+**v0.3.x** 鈥?Plugin-like provider templates, more AI coding client presets, optional local encrypted secrets, Docker support
 
 **Not planned:** OAuth subscription routing, cloud-hosted key sync, built-in account sharing, bypassing provider rate limits, storing full prompts by default.
 
 ---
 
-[MIT License](LICENSE) · [Third Party Notices](THIRD_PARTY_NOTICES.md) · [Release Notes](docs/release-v0.1.0.md)
+[MIT License](LICENSE) 路 [Third Party Notices](THIRD_PARTY_NOTICES.md) 路 [Release Notes](docs/release-v0.3.0.md)
+

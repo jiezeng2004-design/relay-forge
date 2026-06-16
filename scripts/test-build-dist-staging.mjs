@@ -2,14 +2,15 @@
  * test-build-dist-staging.mjs — Verify that build-dist produces a clean,
  * verifiable release zip with correct version and no forbidden files.
  *
- * 7 assertions:
+ * 8+ assertions:
  *   1. build-dist.mjs exists
  *   2. build-dist exits 0
  *   3. zip file exists
  *   4. verify-zip passes on the zip
  *   5. zip package.json version matches current package.json
- *   6. zip has no forbidden files, no backslash entries
- *   7. staging tree passed strict pre-release
+ *   6. zip has no forbidden/backslash entries, no relay-forge*.txt
+ *   7. report.md has no old openrelay-like 0.3.7 report (or excluded)
+ *   8. staging tree passed strict pre-release
  *
  * Usage: node scripts/test-build-dist-staging.mjs
  */
@@ -85,13 +86,17 @@ try {
 } catch (e) { nok("zip package.json version", e.message); }
 
 // 6 — forbidden files & backslash check
+let reportMdContent = null;
 try {
   const buf = readFileSync(ZIP);
   const bad = [];
+  const relayForgeTxt = [];
   let off = 0;
   while (off < buf.length - 4) {
     const sig = buf.readUInt32LE(off);
     if (sig !== 0x04034b50) { off++; continue; }
+    const flags = buf.readUInt16LE(off + 6);
+    const method = buf.readUInt16LE(off + 8);
     const nl = buf.readUInt16LE(off + 26);
     const el = buf.readUInt16LE(off + 28);
     const name = buf.subarray(off + 30, off + 30 + nl).toString("utf8");
@@ -102,11 +107,33 @@ try {
     for (const d of ["data/", "backups/", "node_modules/"]) {
       if (n === d.slice(0,-1) || n.startsWith(d)) bad.push(n);
     }
+    if (/\.zip$/.test(n) || /\.zip\.sha256$/.test(n)) bad.push(n);
+    if (/^relay-forge.*\.txt$/.test(name.split("/").pop())) relayForgeTxt.push(name);
+    if (n === "report.md") {
+      const ds = off + 30 + nl + el;
+      const de = ds + cs;
+      reportMdContent = method === 0
+        ? buf.subarray(ds, de).toString("utf8")
+        : (method === 8 ? inflateRawSync(buf.subarray(ds, de)).toString("utf8") : null);
+    }
     off += 30 + nl + el + cs;
   }
   if (bad.length === 0) ok("zip has no forbidden/backslash entries");
   else nok("zip forbidden/backslash check", bad.join(", "));
+  if (relayForgeTxt.length === 0) ok("no relay-forge*.txt in zip");
+  else nok("zip contains relay-forge*.txt", relayForgeTxt.join(", "));
 } catch (e) { nok("zip forbidden/backslash check", e.message); }
+
+// 7 — report.md content clean check
+if (reportMdContent !== null) {
+  if (reportMdContent.includes("openrelay-like 0.3.7")) {
+    nok("report.md has no old openrelay-like 0.3.7 report", "found 'openrelay-like 0.3.7'");
+  } else {
+    ok("report.md is clean (no openrelay-like 0.3.7 report)");
+  }
+} else {
+  ok("report.md not in zip (clean by exclusion)");
+}
 
 // 7
 if (built) ok("staging strict pre-release passed (proven by build-dist exit 0)");

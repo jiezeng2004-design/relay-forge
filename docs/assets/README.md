@@ -1,6 +1,18 @@
 # Screenshot and GIF Asset Checklist
 
-## Required assets for v0.1.0 release
+## Required assets for v0.3.0 release
+
+| # | Asset | Description | Status |
+|---|-------|-------------|--------|
+| 1 | `relayforge-v0.3-overview-light.png` | Overview in light appearance | Needs capture |
+| 2 | `relayforge-v0.3-overview-dark.png` | Overview in dark appearance | Needs capture |
+| 3 | `relayforge-v0.3-combo-models.png` | Combo Models routing path | Needs capture |
+| 4 | `relayforge-v0.3-clients.png` | Copy-ready client setup cards | Needs capture |
+| 5 | `relayforge-v0.3-usage.png` | Usage analytics / observability page | Needs capture |
+| 6 | `relayforge-v0.3-diagnostics.png` | Redacted diagnostics page | Needs capture |
+| 7 | `relayforge-v0.3-mobile.png` | Mobile responsive dashboard | Needs capture |
+
+## Historical assets for v0.1.0 release
 
 | # | Asset | Description | Status |
 |---|-------|-------------|--------|
