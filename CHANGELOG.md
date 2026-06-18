@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Expanded `docs/open-source-application.md` into a reviewer-friendly evidence
+  page for open-source maintainer support applications.
+
 ## v0.3.1 - 2026-06-16
 
 ### Added
