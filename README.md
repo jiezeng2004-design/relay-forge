@@ -70,6 +70,11 @@ Demo:
 
 ![RelayForge fallback demo](docs/assets/relayforge-v0.3-fallback-demo.gif)
 
+For reviewers, [docs/open-source-application.md](docs/open-source-application.md)
+summarizes the public evidence for open-source maintainer support applications:
+project scope, privacy boundary, release verification, demo assets, and
+maintainer rationale.
+
 ## Quick Start
 
 ### A. Windows zip users
