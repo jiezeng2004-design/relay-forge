@@ -6,6 +6,9 @@
 
 - Expanded `docs/open-source-application.md` into a reviewer-friendly evidence
   page for open-source maintainer support applications.
+- Added root-level `CONTRIBUTING.md` and `SECURITY.md` files so reviewers and
+  contributors can quickly find the contribution checklist and vulnerability
+  reporting policy.
 
 ## v0.3.1 - 2026-06-16
 
