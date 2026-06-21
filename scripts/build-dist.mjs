@@ -16,7 +16,7 @@ const VERIFY_ZIP_SCRIPT = join(ROOT, "scripts", "verify-zip.mjs");
 const KEEP_STAGE = !!process.env.OPENRELAY_DIST_KEEP_STAGE;
 
 const EXCLUDE_FILE_NAMES = new Set([
-  ".env", "config.json",
+  ".git", ".env", "config.json",
   "tool-env.ps1", "tool-env.cmd", "tool-env.sh",
   "tool-verify.ps1", "tool-verify.cmd", "tool-verify.sh",
   "package-lock.json"
