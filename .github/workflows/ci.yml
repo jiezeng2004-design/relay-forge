@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [main, master]
   pull_request:
   workflow_dispatch:
 
-# Cancel in-flight runs for the same branch / PR.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,60 +17,62 @@ jobs:
   test:
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-        node:
-          - 18
-          - 20
-          - 22
-
+        os: [ubuntu-latest, windows-latest]
+        node: [18, 20, 22]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: ${{ matrix.node }}
 
       - name: Read-only check
-        # `npm run check` must NOT create data/ and must NOT
-        # print the full RELAY_TOKEN. We also stash the printed
-        # status so a failure can be diffed without re-running.
         run: npm run check
 
       - name: Pre-release (strict)
-        # Stricter distribution check (forbidden files, secret
-        # scan over the source tree). In CI the checkout is
-        # clean — no .env, config.json, data/ present.
         run: npm run pre-release:ci
 
       - name: Unit tests
-        # Pure-JS, no HTTP, no spawned children, no mock
-        # upstream. Runs the 15+ scripts in test:unit. Fast
-        # (~30s) and 100% deterministic.
         run: npm run test:unit
 
       - name: E2E tests
-        # Spawns the relay child + a mock upstream. Uses
-        # ephemeral ports (PORT=0) so it does not collide
-        # with anything else on the runner. All assertions
-        # are made against the mock, never a real provider.
         run: npm run test:e2e
         env:
-          # Test-only opt-in for the relay's short
-          # streamIdleTimeoutMs floor (see src/config.js).
-          # The production 10s minimum is preserved in
-          # deploys that do not set this.
           OPENRELAY_TEST_ALLOW_SHORT_IDLE_TIMEOUT: "true"
 
       - name: Doctor (redacted diagnostic)
-        # Confirms the doctor command works on every platform
-        # and that the output is redacted (no real API key,
-        # no full token).
         run: npm run doctor
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Scan Git history
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+
+  gate:
+    name: CI gate
+    if: always()
+    needs: [test, secrets]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all checks
+        shell: bash
+        run: |
+          test "${{ needs.test.result }}" = "success"
+          test "${{ needs.secrets.result }}" = "success"

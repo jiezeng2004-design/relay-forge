@@ -7,8 +7,9 @@
  *   2. verify-release-artifacts exits 0 on a valid zip
  *   3. verify-release-artifacts exits non-zero on a missing zip
  *   4. verify-release-artifacts exits non-zero on a zip with forbidden files
- *   5. build-dist produces a .sha256 file
- *   6. sha256 file contains the correct hash format
+ *   5. build-dist excludes the Git worktree .git marker file
+ *   6. build-dist produces a .sha256 file
+ *   7. sha256 file contains the correct hash format
  *
  * Usage: node scripts/test-release-artifacts.mjs
  */
@@ -84,7 +85,16 @@ try {
   else nok("verify-release-artifacts FAIL on zip with .env", e.message);
 }
 
-// ---- Test 5: build-dist produces .sha256 file (if build-dist can run) ----
+// ---- Test 5: Git worktree marker exclusion is explicit ----
+const buildDistSource = readFileSync(BUILD_DIST, "utf8");
+const fileExcludes = buildDistSource.match(/const EXCLUDE_FILE_NAMES = new Set\(\[([\s\S]*?)\]\);/);
+if (fileExcludes && /["']\.git["']/.test(fileExcludes[1])) {
+  ok("build-dist excludes the Git worktree .git marker file");
+} else {
+  nok("build-dist excludes the Git worktree .git marker file", ".git is not in EXCLUDE_FILE_NAMES");
+}
+
+// ---- Test 6: build-dist produces .sha256 file (if build-dist can run) ----
 const ZIP = join(ROOT, `relayforge-${VER}.zip`);
 const SHA256_FILE = `${ZIP}.sha256`;
 try {
@@ -102,7 +112,7 @@ try {
   nok("build-dist produces .sha256 file", `build-dist failed: ${(e.stderr||"").toString().slice(0,300)}`);
 }
 
-// ---- Test 6: sha256 file format is correct ----
+// ---- Test 7: sha256 file format is correct ----
 if (existsSync(SHA256_FILE)) {
   const shaContent = readFileSync(SHA256_FILE, "utf8").trim();
   const regex = /^[a-f0-9]{64}\s+(relayforge-\d+\.\d+\.\d+\.zip)$/;
