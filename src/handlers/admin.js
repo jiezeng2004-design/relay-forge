@@ -27,10 +27,43 @@ import {
 } from "../provider-template-import-plan.js";
 
 const SUPPORTED_TABS = new Set(["overview", "providers", "routes", "tools", "usage", "settings"]);
+const MAX_CONFIG_DEPTH = 10;
+const DANGEROUS_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+
+function validateInputSafety(value, path = "", depth = 0) {
+  if (depth > MAX_CONFIG_DEPTH) {
+    return `object too deep at ${path || "(root)"} (max depth ${MAX_CONFIG_DEPTH})`;
+  }
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "object") return null;
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      const err = validateInputSafety(value[i], `${path}[${i}]`, depth + 1);
+      if (err) return err;
+    }
+    return null;
+  }
+  for (const key of Object.keys(value)) {
+    if (DANGEROUS_KEYS.has(key)) {
+      return `dangerous key "${key}" at ${path || "(root)"}`;
+    }
+    const err = validateInputSafety(value[key], path ? `${path}.${key}` : key, depth + 1);
+    if (err) return err;
+  }
+  return null;
+}
 
 export function createAdminHandlers(ctx) {
   function isLocalProvider(provider) {
     return registryIsLocalProvider(provider);
+  }
+
+  function withAuthAndBody(handler) {
+    return async function (req, res) {
+      if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
+      const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+      return handler(req, res, body);
+    };
   }
 
   function resolveActiveProfile(name) {
@@ -180,19 +213,26 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleSaveConfig(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleSaveConfigImpl(req, res, body) {
     const candidate = body.config || body;
+    const safetyError = validateInputSafety(candidate);
+    if (safetyError) {
+      return ctx.sendJson(res, {
+        ok: false,
+        error: "invalid_input",
+        message: safetyError,
+        details: { code: "unsafe_input" }
+      }, 400);
+    }
     const schema = validateConfig(candidate);
     if (!schema.ok) {
       return ctx.sendJson(res, {
         ok: false,
         error: "config_validation_failed",
         message: "config has " + schema.errors.length + " schema error(s); see `errors[]`",
-        errors: schema.errors,
-        warnings: schema.warnings || []
+        details: { errors: schema.errors, warnings: schema.warnings || [] }
       }, 400);
     }
     if (schema.warnings && schema.warnings.length > 0) {
@@ -201,28 +241,37 @@ export function createAdminHandlers(ctx) {
     const result = ctx.applyEditableConfig(candidate, "save");
     return ctx.sendJson(res, { ...result, warnings: schema.warnings || [] });
   }
+  const handleSaveConfig = withAuthAndBody(handleSaveConfigImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleImportConfig(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleImportConfigImpl(req, res, body) {
     const candidate = body.config || body;
+    const safetyError = validateInputSafety(candidate);
+    if (safetyError) {
+      return ctx.sendJson(res, {
+        ok: false,
+        error: "invalid_input",
+        message: safetyError,
+        details: { code: "unsafe_input" }
+      }, 400);
+    }
     const schema = validateConfig(candidate);
     if (!schema.ok) {
       return ctx.sendJson(res, {
         ok: false,
         error: "config_validation_failed",
         message: "imported config has " + schema.errors.length + " schema error(s); see `errors[]`",
-        errors: schema.errors,
-        warnings: schema.warnings || []
+        details: { errors: schema.errors, warnings: schema.warnings || [] }
       }, 400);
     }
     const result = ctx.applyEditableConfig(candidate, "import");
     return ctx.sendJson(res, { ...result, warnings: schema.warnings || [] });
   }
+  const handleImportConfig = withAuthAndBody(handleImportConfigImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
@@ -291,10 +340,9 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleSetProfile(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleSetProfileImpl(req, res, body) {
     const requested = String(body.profile || body.name || "").trim();
     const nextProfile = resolveActiveProfile(requested);
     if (!nextProfile) {
@@ -306,47 +354,47 @@ export function createAdminHandlers(ctx) {
     }
     return ctx.sendJson(res, { ok: true, activeProfile: ctx.activeProfile, defaultModel: nextProfile.defaultModel });
   }
+  const handleSetProfile = withAuthAndBody(handleSetProfileImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleUpdateProfile(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleUpdateProfileImpl(req, res, body) {
     const result = updateProfileEntry(body);
     return ctx.sendJson(res, result.body, result.status);
   }
+  const handleUpdateProfile = withAuthAndBody(handleUpdateProfileImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleCloneProfile(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleCloneProfileImpl(req, res, body) {
     const result = cloneProfileEntry(body);
     return ctx.sendJson(res, result.body, result.status);
   }
+  const handleCloneProfile = withAuthAndBody(handleCloneProfileImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleDeleteProfile(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleDeleteProfileImpl(req, res, body) {
     const result = deleteProfileEntry(body);
     return ctx.sendJson(res, result.body, result.status);
   }
+  const handleDeleteProfile = withAuthAndBody(handleDeleteProfileImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleTestProvider(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleTestProviderImpl(req, res, body) {
     const providerName = String(body.provider || "");
     const provider = ctx.config.providers.find((item) => item.name === providerName);
     if (!provider) return ctx.sendJson(res, { ok: false, error: "provider_not_found", provider: providerName }, 404);
@@ -356,14 +404,14 @@ export function createAdminHandlers(ctx) {
       : await ctx.testProviderWithKey(provider, null, provider.name, body.model);
     return ctx.sendJson(res, result, result.ok ? 200 : 502);
   }
+  const handleTestProvider = withAuthAndBody(handleTestProviderImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleDiscoverModels(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleDiscoverModelsImpl(req, res, body) {
     const customBaseUrl = String(body.baseUrl || "").trim();
     if (customBaseUrl) {
       const customApiKey = body.apiKey === undefined || body.apiKey === null
@@ -381,20 +429,21 @@ export function createAdminHandlers(ctx) {
     const result = await ctx.discoverProviderModels(provider);
     return ctx.sendJson(res, result, result.ok ? 200 : 502);
   }
+  const handleDiscoverModels = withAuthAndBody(handleDiscoverModelsImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleCheckBalance(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleCheckBalanceImpl(req, res, body) {
     const providerName = String(body.provider || "");
     const provider = ctx.config.providers.find((item) => item.name === providerName);
     if (!provider) return ctx.sendJson(res, { ok: false, error: "provider_not_found", provider: providerName }, 404);
     const result = await ctx.checkProviderBalance(provider);
     return ctx.sendJson(res, result, result.ok ? 200 : 502);
   }
+  const handleCheckBalance = withAuthAndBody(handleCheckBalanceImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
@@ -468,10 +517,9 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleProviderTemplateImport(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleProviderTemplateImportImpl(req, res, body) {
     const plan = providerTemplateImportPlan();
     if (!body || body.apply !== true || body.confirm !== PROVIDER_TEMPLATE_IMPORT_CONFIRMATION) {
       return ctx.sendJson(res, {
@@ -504,14 +552,14 @@ export function createAdminHandlers(ctx) {
       return ctx.sendJson(res, { ok: false, error: "provider_template_import_failed", message: error.message, plan }, 400);
     }
   }
+  const handleProviderTemplateImport = withAuthAndBody(handleProviderTemplateImportImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleCreateProvider(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleCreateProviderImpl(req, res, body) {
     let provider;
     try {
       provider = ctx.sanitizeProviderInput(body, null, { create: true });
@@ -532,6 +580,7 @@ export function createAdminHandlers(ctx) {
       return ctx.sendJson(res, { ok: false, error: "provider_save_failed", message: error.message }, 400);
     }
   }
+  const handleCreateProvider = withAuthAndBody(handleCreateProviderImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
@@ -627,10 +676,9 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleCreateRoute(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleCreateRouteImpl(req, res, body) {
     let route;
     try {
       route = ctx.sanitizeRouteInput(body, null, { create: true });
@@ -651,6 +699,7 @@ export function createAdminHandlers(ctx) {
       return ctx.sendJson(res, { ok: false, error: "route_save_failed", message: error.message }, 400);
     }
   }
+  const handleCreateRoute = withAuthAndBody(handleCreateRouteImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
@@ -729,35 +778,34 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleAddKey(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleAddKeyImpl(req, res, body) {
     const provider = String(body.provider || "").trim();
     return addKeyForProvider(res, provider, body);
   }
+  const handleAddKey = withAuthAndBody(handleAddKeyImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleAddProviderKey(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
+  async function handleAddProviderKeyImpl(req, res, body) {
     const provider = ctx.providerNameFromKeyUrl(req.url);
     if (!provider) return ctx.sendJson(res, { ok: false, error: "provider_required" }, 400);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
     return addKeyForProvider(res, provider, body);
   }
+  const handleAddProviderKey = withAuthAndBody(handleAddProviderKeyImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleUpdateKey(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
+  async function handleUpdateKeyImpl(req, res, body) {
     const id = ctx.keyIdFromUrl(req.url);
     if (!id) return ctx.sendJson(res, { ok: false, error: "id_required" }, 400);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
     const patch = {};
     if (body.label !== undefined) patch.label = String(body.label);
     if (body.enabled !== undefined) patch.enabled = !!body.enabled;
@@ -781,6 +829,7 @@ export function createAdminHandlers(ctx) {
     ctx.keyPool.reload(ctx.config.providers);
     return ctx.sendJson(res, { ok: true, key: record });
   }
+  const handleUpdateKey = withAuthAndBody(handleUpdateKeyImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
@@ -828,10 +877,9 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleTestRawKey(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleTestRawKeyImpl(req, res, body) {
     const providerName = String(body.provider || "").trim();
     const value = String(body.value || body.key || "").trim();
     if (!providerName) return ctx.sendJson(res, { ok: false, error: "provider_required" }, 400);
@@ -844,6 +892,7 @@ export function createAdminHandlers(ctx) {
     const result = await ctx.testProviderWithKey(provider, value, providerName, body.model);
     return ctx.sendJson(res, { ok: !!result.ok, ephemeral: true, result }, result.ok ? 200 : 502);
   }
+  const handleTestRawKey = withAuthAndBody(handleTestRawKeyImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req
@@ -1244,10 +1293,9 @@ export function createAdminHandlers(ctx) {
   /**
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @param {object} body
    */
-  async function handleLocalConnectorConsent(req, res) {
-    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
-    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+  async function handleLocalConnectorConsentImpl(req, res, body) {
     const platform = body?.platform || "auto";
     const action = body?.action === "revoke" || body?.revoke === true ? "revoke" : body?.action === "approve" || body?.approve === true ? "approve" : "";
     const required = action === "revoke"
@@ -1309,6 +1357,7 @@ export function createAdminHandlers(ctx) {
       return ctx.sendJson(res, { ok: false, error: "save_failed", message: error.message }, 400);
     }
   }
+  const handleLocalConnectorConsent = withAuthAndBody(handleLocalConnectorConsentImpl);
 
   /**
    * @param {import("node:http").IncomingMessage} req

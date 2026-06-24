@@ -7,12 +7,45 @@ const V1_PROXY_PATHS = new Set([
 import { findCombo, resolveComboRoute } from "../combo.js";
 
 /**
- * @param {string} model
- * @param {object} config
- * @param {string} activeProfile
- * @param {object} [providerHealth]
- * @param {Map} [routeRuntime]
- * @returns {object|null}
+ * @typedef {Object} RouteCandidate
+ * @property {object} provider - Provider configuration object
+ * @property {string} model - Model name
+ * @property {number} weight - Candidate weight for weighted strategies
+ * @property {boolean} [enabled] - Whether the candidate is enabled
+ * @property {number} [priority] - Candidate priority
+ */
+
+/**
+ * @typedef {Object} ResolvedRoute
+ * @property {string} name - Route name
+ * @property {string} strategy - Routing strategy (fallback, round_robin, weighted, weighted_round_robin)
+ * @property {object} limits - Route limits configuration
+ * @property {RouteCandidate[]} candidates - Array of route candidates
+ * @property {object} [combo] - Combo configuration if this is a combo route
+ */
+
+/**
+ * @typedef {Object} RouteRuntimeState
+ * @property {number} roundRobinIndex - Current round-robin index
+ * @property {number} weightedCursor - Current weighted strategy cursor
+ */
+
+/**
+ * @typedef {Object} ProviderHealthStatus
+ * @property {boolean} healthy - Whether the provider is healthy
+ * @property {string} [error] - Error message if unhealthy
+ */
+
+/**
+ * Resolves a model name to a route configuration.
+ * Checks model aliases, combos, profiles, explicit provider:model,
+ * named routes, direct model matches, and default provider fallback.
+ * @param {string} model - Requested model name
+ * @param {object} config - Full configuration object
+ * @param {string} activeProfile - Currently active profile name
+ * @param {object} [providerHealth] - Provider health tracker instance
+ * @param {Map<string, RouteRuntimeState>} [routeRuntime] - Route runtime state map
+ * @returns {ResolvedRoute|null} Resolved route object or null if no match found
  */
 export function selectRoute(model, config, activeProfile, providerHealth, routeRuntime) {
   const rawModel = normalizeRequestedModel(model, config, activeProfile);

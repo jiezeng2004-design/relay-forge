@@ -11,10 +11,18 @@
 const STRATEGIES = new Set(["fallback", "round_robin", "weighted", "weighted_round_robin"]);
 const API_FORMATS = new Set(["openai", "anthropic"]);
 const ALLOWED_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/;
+const NAME_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;
+const MODEL_NAME_MAX_LENGTH = 256;
 const FORBIDDEN_FIELDS = new Set([
   "apikey", "api_key", "apiKey", "token", "secret", "password", "cookie", "authorization",
   "session", "bearer", "auth", "credential", "private_key"
 ]);
+const MAX_PROVIDERS = 100;
+const MAX_ROUTES = 100;
+const MAX_PROFILES = 50;
+const MAX_COMBOS = 50;
+const MAX_CANDIDATES_PER_ROUTE = 20;
+const MAX_MODELS_PER_PROVIDER = 200;
 
 // Validates a config object (parsed JSON) against the OpenRelay
 // schema. Returns:
@@ -34,6 +42,8 @@ export function validateConfig(config) {
     errors.push({ path: "providers", message: "must be an array of provider objects", expected: "array", got: typeof config.providers });
   } else if (config.providers.length === 0) {
     errors.push({ path: "providers", message: "must contain at least one provider", expected: "array.length >= 1", got: "0" });
+  } else if (config.providers.length > MAX_PROVIDERS) {
+    errors.push({ path: "providers", message: `too many providers (max ${MAX_PROVIDERS})`, expected: `array.length <= ${MAX_PROVIDERS}`, got: String(config.providers.length) });
   } else {
     const providerNames = new Set();
     config.providers.forEach((provider, index) => {
@@ -44,6 +54,8 @@ export function validateConfig(config) {
       }
       if (typeof provider.name !== "string" || !provider.name.trim()) {
         errors.push({ path: `${base}.name`, message: "must be a non-empty string", expected: "string", got: typeof provider.name });
+      } else if (!NAME_PATTERN.test(provider.name)) {
+        errors.push({ path: `${base}.name`, message: "must contain only letters, numbers, underscore, or dash (1-64 chars)", expected: "matching ^[A-Za-z0-9_-]{1,64}$", got: provider.name });
       } else if (providerNames.has(provider.name)) {
         errors.push({ path: `${base}.name`, message: `duplicate provider name "${provider.name}"`, expected: "unique", got: provider.name });
       } else {
@@ -70,9 +82,14 @@ export function validateConfig(config) {
       if (provider.models !== undefined && !Array.isArray(provider.models)) {
         errors.push({ path: `${base}.models`, message: "must be an array of model name strings", expected: "array<string>", got: typeof provider.models });
       } else if (Array.isArray(provider.models)) {
+        if (provider.models.length > MAX_MODELS_PER_PROVIDER) {
+          errors.push({ path: `${base}.models`, message: `too many models (max ${MAX_MODELS_PER_PROVIDER})`, expected: `array.length <= ${MAX_MODELS_PER_PROVIDER}`, got: String(provider.models.length) });
+        }
         provider.models.forEach((model, mi) => {
           if (typeof model !== "string" || !model.trim()) {
             errors.push({ path: `${base}.models[${mi}]`, message: "must be a non-empty string", expected: "string", got: typeof model });
+          } else if (model.length > MODEL_NAME_MAX_LENGTH) {
+            errors.push({ path: `${base}.models[${mi}]`, message: `model name too long (max ${MODEL_NAME_MAX_LENGTH} chars)`, expected: `length <= ${MODEL_NAME_MAX_LENGTH}`, got: String(model.length) });
           }
         });
       }
@@ -110,6 +127,8 @@ export function validateConfig(config) {
   if (config.combos !== undefined) {
     if (!Array.isArray(config.combos)) {
       errors.push({ path: "combos", message: "must be an array of combo objects", expected: "array", got: typeof config.combos });
+    } else if (config.combos.length > MAX_COMBOS) {
+      errors.push({ path: "combos", message: `too many combos (max ${MAX_COMBOS})`, expected: `array.length <= ${MAX_COMBOS}`, got: String(config.combos.length) });
     } else {
       const comboNames = new Set();
       const providerNames = new Set((config.providers || []).map((p) => p && p.name).filter(Boolean));
@@ -167,6 +186,8 @@ export function validateConfig(config) {
   if (config.routes !== undefined) {
     if (!Array.isArray(config.routes)) {
       errors.push({ path: "routes", message: "must be an array of route objects", expected: "array", got: typeof config.routes });
+    } else if (config.routes.length > MAX_ROUTES) {
+      errors.push({ path: "routes", message: `too many routes (max ${MAX_ROUTES})`, expected: `array.length <= ${MAX_ROUTES}`, got: String(config.routes.length) });
     } else {
       const routeNames = new Set();
       config.routes.forEach((route, ri) => {
@@ -177,6 +198,8 @@ export function validateConfig(config) {
         }
         if (typeof route.name !== "string" || !route.name.trim()) {
           errors.push({ path: `${base}.name`, message: "must be a non-empty string", expected: "string", got: typeof route.name });
+        } else if (!NAME_PATTERN.test(route.name)) {
+          errors.push({ path: `${base}.name`, message: "must contain only letters, numbers, underscore, or dash (1-64 chars)", expected: "matching ^[A-Za-z0-9_-]{1,64}$", got: route.name });
         } else if (routeNames.has(route.name)) {
           errors.push({ path: `${base}.name`, message: `duplicate route name "${route.name}"`, expected: "unique", got: route.name });
         } else {
@@ -189,6 +212,8 @@ export function validateConfig(config) {
           errors.push({ path: `${base}.candidates`, message: "must be a non-empty array", expected: "array.length >= 1", got: typeof route.candidates });
         } else if (route.candidates.length === 0) {
           errors.push({ path: `${base}.candidates`, message: "must have at least one candidate", expected: "array.length >= 1", got: "0" });
+        } else if (route.candidates.length > MAX_CANDIDATES_PER_ROUTE) {
+          errors.push({ path: `${base}.candidates`, message: `too many candidates (max ${MAX_CANDIDATES_PER_ROUTE})`, expected: `array.length <= ${MAX_CANDIDATES_PER_ROUTE}`, got: String(route.candidates.length) });
         } else {
           const providerNames = new Set((config.providers || []).map((p) => p && p.name).filter(Boolean));
           route.candidates.forEach((candidate, ci) => {
@@ -251,6 +276,8 @@ export function validateConfig(config) {
   if (config.profiles !== undefined) {
     if (!Array.isArray(config.profiles)) {
       errors.push({ path: "profiles", message: "must be an array of profile objects", expected: "array", got: typeof config.profiles });
+    } else if (config.profiles.length > MAX_PROFILES) {
+      errors.push({ path: "profiles", message: `too many profiles (max ${MAX_PROFILES})`, expected: `array.length <= ${MAX_PROFILES}`, got: String(config.profiles.length) });
     } else {
       const profileNames = new Set();
       const providerModelSet = new Set();
@@ -266,6 +293,8 @@ export function validateConfig(config) {
         }
         if (typeof profile.name !== "string" || !profile.name.trim()) {
           errors.push({ path: `${base}.name`, message: "must be a non-empty string", expected: "string", got: typeof profile.name });
+        } else if (!NAME_PATTERN.test(profile.name)) {
+          errors.push({ path: `${base}.name`, message: "must contain only letters, numbers, underscore, or dash (1-64 chars)", expected: "matching ^[A-Za-z0-9_-]{1,64}$", got: profile.name });
         } else if (profileNames.has(profile.name)) {
           errors.push({ path: `${base}.name`, message: `duplicate profile name "${profile.name}"`, expected: "unique", got: profile.name });
         } else {
@@ -361,6 +390,32 @@ export function validateConfig(config) {
               errors.push({ path: `healthChecks.providers[${ni}]`, message: `references missing provider "${name}"`, expected: Array.from(providerNames).join("|"), got: name });
             }
           });
+        }
+      }
+    }
+  }
+
+  // ----- top-level: rateLimiter -----
+  if (config.rateLimiter !== undefined) {
+    if (typeof config.rateLimiter !== "object" || config.rateLimiter === null || Array.isArray(config.rateLimiter)) {
+      errors.push({ path: "rateLimiter", message: "must be a JSON object", expected: "object", got: typeof config.rateLimiter });
+    } else {
+      if (config.rateLimiter.enabled !== undefined && typeof config.rateLimiter.enabled !== "boolean") {
+        errors.push({ path: "rateLimiter.enabled", message: "must be a boolean", expected: "boolean", got: typeof config.rateLimiter.enabled });
+      }
+      if (config.rateLimiter.windowMs !== undefined) {
+        if (typeof config.rateLimiter.windowMs !== "number" || !Number.isInteger(config.rateLimiter.windowMs) || config.rateLimiter.windowMs < 1000 || config.rateLimiter.windowMs > 3600000) {
+          errors.push({ path: "rateLimiter.windowMs", message: "must be an integer in [1000, 3600000] (1s to 1h)", expected: "1000..3600000", got: String(config.rateLimiter.windowMs) });
+        }
+      }
+      if (config.rateLimiter.maxRequests !== undefined) {
+        if (typeof config.rateLimiter.maxRequests !== "number" || !Number.isInteger(config.rateLimiter.maxRequests) || config.rateLimiter.maxRequests < 1 || config.rateLimiter.maxRequests > 100000) {
+          errors.push({ path: "rateLimiter.maxRequests", message: "must be an integer in [1, 100000]", expected: "1..100000", got: String(config.rateLimiter.maxRequests) });
+        }
+      }
+      if (config.rateLimiter.adminMaxRequests !== undefined) {
+        if (typeof config.rateLimiter.adminMaxRequests !== "number" || !Number.isInteger(config.rateLimiter.adminMaxRequests) || config.rateLimiter.adminMaxRequests < 1 || config.rateLimiter.adminMaxRequests > 100000) {
+          errors.push({ path: "rateLimiter.adminMaxRequests", message: "must be an integer in [1, 100000]", expected: "1..100000", got: String(config.rateLimiter.adminMaxRequests) });
         }
       }
     }

@@ -26,12 +26,23 @@ import { sanitizedConfig as sanitizedConfigOps, editableConfig as editableConfig
 import { createAdminHandlers } from "./handlers/admin.js";
 import { createProxyHandlers } from "./handlers/proxy.js";
 import { createRouter } from "./router.js";
+import { createRateLimiter } from "./rate-limiter.js";
 import { PROVIDER_TEMPLATES, ROUTE_TEMPLATES, LOCAL_PROVIDER_NAMES, SUPPORTED_TABS, V1_PROXY_PATHS, isLocalProvider as registryIsLocalProvider } from "./provider-registry.js";
 import { ProviderRegistry, createProviderRegistry } from "./provider-registry-lib.js";
 import { RequestLog, computeStats } from "./request-log.js";
 import { buildRequestMeta } from "./privacy.js";
 
 const DEFAULT_PORT = 18765;
+const MAX_ERROR_ENTRIES = 50;
+const REQUEST_LOG_CAPACITY = 20;
+const REQUEST_STATS_SAMPLE_SIZE = 100;
+const MODEL_DISCOVERY_MAX_RESULTS = 500;
+const DEFAULT_HEALTH_CHECK_INTERVAL_MINUTES = 60;
+const MIN_HEALTH_CHECK_INTERVAL_MINUTES = 5;
+const REQUEST_TIMEOUT_MS = 15000;
+const BALANCE_REQUEST_TIMEOUT_MS = 10000;
+const STATE_FLUSH_TIMEOUT_MS = 3000;
+const SERVER_SHUTDOWN_TIMEOUT_MS = 5000;
 const cliOptions = parseCliOptions(process.argv.slice(2));
 const rootDir = detectRuntimeRootDir(cliOptions.rootDir);
 const packageVersion = readPackageVersion();
@@ -60,13 +71,13 @@ const usage = new UsageTracker(persistedState.usage, { retentionDays: config.his
 const healthCache = persistedState.healthCache || {};
 const modelDiscoveryCache = persistedState.modelDiscoveryCache || {};
 const balanceCache = persistedState.balanceCache || {};
-const recentErrors = Array.isArray(persistedState.recentErrors) ? persistedState.recentErrors.slice(0, 50) : [];
+const recentErrors = Array.isArray(persistedState.recentErrors) ? persistedState.recentErrors.slice(0, MAX_ERROR_ENTRIES) : [];
 const providerHealth = new ProviderHealthTracker(persistedState.providerHealth || {});
 let activeProfile = resolveActiveProfile(extractActiveProfileName(persistedState.activeProfile) || config.activeProfile)?.name || (typeof config.activeProfile === "string" ? config.activeProfile : null) || null;
 let healthCheckTimer = null;
 let healthCheckRunning = false;
 
-const requestLog = new RequestLog(20);
+const requestLog = new RequestLog(REQUEST_LOG_CAPACITY);
 const providerRegistry = createProviderRegistry(config.providers);
 
 const port = Number(process.env.RELAYFORGE_PORT || process.env.PORT || process.env.OPENRELAY_PORT || DEFAULT_PORT);
@@ -135,14 +146,14 @@ function recordError(scope, error, category, meta) {
   if (!error) return;
   const entry = buildErrorEntry({ scope, category: isValidCategory(category) ? category : null, error, ...(meta && typeof meta === "object" ? meta : {}) });
   recentErrors.unshift(entry);
-  recentErrors.length = Math.min(recentErrors.length, 50);
+  recentErrors.length = Math.min(recentErrors.length, MAX_ERROR_ENTRIES);
 }
 
 /** @returns {void} */
 function scheduleHealthChecks() {
   if (healthCheckTimer) { clearInterval(healthCheckTimer); healthCheckTimer = null; }
   if (!config.healthChecks.enabled) return;
-  const intervalMinutes = Math.max(5, Number(config.healthChecks.intervalMinutes || 60));
+  const intervalMinutes = Math.max(MIN_HEALTH_CHECK_INTERVAL_MINUTES, Number(config.healthChecks.intervalMinutes || DEFAULT_HEALTH_CHECK_INTERVAL_MINUTES));
   healthCheckTimer = setInterval(() => { runScheduledHealthChecks().catch((error) => { console.error(`scheduled health check failed: ${error.message}`); }); }, intervalMinutes * 60 * 1000);
 }
 
@@ -313,7 +324,7 @@ async function discoverModelsByUrl({ baseUrl, apiKey }) {
   if (apiKey !== null && apiKey !== undefined && String(apiKey).trim() !== "") headers.authorization = "Bearer " + String(apiKey).trim();
   const startedAt = Date.now();
   try {
-    const response = await fetch(url, { method: "GET", headers, signal: AbortSignal.timeout(15000) });
+    const response = await fetch(url, { method: "GET", headers, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
     const responseText = await response.text();
     const elapsedMs = Date.now() - startedAt;
     if (response.type === "opaqueredirect" || (response.status >= 300 && response.status < 400)) return { ok: false, error: "redirect_refused", status: response.status, elapsedMs };
@@ -326,10 +337,91 @@ async function discoverModelsByUrl({ baseUrl, apiKey }) {
   }
 }
 
+/** @param {object} p @returns {object} */
+function buildProviderStatus(p) {
+  const local = isLocalProvider(p);
+  const allowInsecure = p.allowInsecureHttp === true;
+  return {
+    name: p.name,
+    displayName: p.displayName || "",
+    baseUrl: p.baseUrl,
+    apiFormat: p.apiFormat,
+    keyEnv: p.keyEnv,
+    allowInsecureHttp: allowInsecure,
+    insecureHttpRisk: allowInsecure && String(p.baseUrl).startsWith("http://") && !local,
+    local,
+    healthHint: providerHealthHint(p),
+    keyCount: getProviderKeys(p).length,
+    models: p.models,
+    extraHeaders: p.extraHeaders || null,
+    balanceEndpoint: p.balanceEndpoint || null
+  };
+}
+
+/** @returns {Array} */
+function buildRouteStatus() {
+  return config.routes.map((rt) => ({
+    name: rt.name,
+    description: rt.description || "",
+    strategy: rt.strategy,
+    limits: rt.limits || {},
+    candidates: rt.candidates
+  }));
+}
+
+/** @returns {object} */
+function buildRouteReferences() {
+  return Object.fromEntries(config.routes.map((rt) => [rt.name, collectRouteReferences(rt.name, config)]));
+}
+
+/** @returns {object} */
+function buildRequestStats() {
+  if (requestLog.size <= 0) {
+    return { total: 0, success: 0, failed: 0, avgLatencyMs: 0, byModel: {}, byProvider: {}, byError: {} };
+  }
+  return computeStats(requestLog.recent(REQUEST_STATS_SAMPLE_SIZE));
+}
+
 /** @returns {object} */
 function buildStatus() {
   usage.resetIfNeeded();
-  return { ok: true, version: packageVersion, modelAliases: config.modelAliases || {}, startedAt: stats.startedAt, configPath, statePath, providers: config.providers.map((p) => ({ name: p.name, displayName: p.displayName || "", baseUrl: p.baseUrl, apiFormat: p.apiFormat, keyEnv: p.keyEnv, allowInsecureHttp: p.allowInsecureHttp === true, insecureHttpRisk: p.allowInsecureHttp === true && String(p.baseUrl).startsWith("http://") && !isLocalProvider(p), local: isLocalProvider(p), healthHint: providerHealthHint(p), keyCount: getProviderKeys(p).length, models: p.models, extraHeaders: p.extraHeaders || null, balanceEndpoint: p.balanceEndpoint || null })), routes: config.routes.map((rt) => ({ name: rt.name, description: rt.description || "", strategy: rt.strategy, limits: rt.limits || {}, candidates: rt.candidates })), combos: config.combos || [], routeReferences: Object.fromEntries(config.routes.map((rt) => [rt.name, collectRouteReferences(rt.name, config)])), routeTemplates: ROUTE_TEMPLATES.map((t) => JSON.parse(JSON.stringify(t))), profiles: profileSummary(), stats, usage: usageSummary(), healthCache, modelDiscoveryCache, balanceCache, recentErrors, providerHealth: providerHealth.summary(), healthChecks: { enabled: config.healthChecks.enabled, intervalMinutes: config.healthChecks.intervalMinutes, providers: config.healthChecks.providers }, keys: keyPool.summary(), webKeys: secretStore.list(), secretStore: { masterKeyOnDisk: secretStore.hasMasterKeyOnDisk(), masterKeyInEnv: secretStore.hasMasterKeyInEnv() }, providerTemplates: PROVIDER_TEMPLATES.map((t) => ({ ...t })), providerCapabilities: providerRegistry.toJSON(), recentRequests: requestLog.recent(20), requestStats: requestLog.size > 0 ? computeStats(requestLog.recent(100)) : { total: 0, success: 0, failed: 0, avgLatencyMs: 0, byModel: {}, byProvider: {}, byError: {} }, relayAuth: describeAuth(relayAuth) };
+  return {
+    ok: true,
+    version: packageVersion,
+    modelAliases: config.modelAliases || {},
+    startedAt: stats.startedAt,
+    configPath,
+    statePath,
+    providers: config.providers.map(buildProviderStatus),
+    routes: buildRouteStatus(),
+    combos: config.combos || [],
+    routeReferences: buildRouteReferences(),
+    routeTemplates: ROUTE_TEMPLATES.map((t) => JSON.parse(JSON.stringify(t))),
+    profiles: profileSummary(),
+    stats,
+    usage: usageSummary(),
+    healthCache,
+    modelDiscoveryCache,
+    balanceCache,
+    recentErrors,
+    providerHealth: providerHealth.summary(),
+    healthChecks: {
+      enabled: config.healthChecks.enabled,
+      intervalMinutes: config.healthChecks.intervalMinutes,
+      providers: config.healthChecks.providers
+    },
+    keys: keyPool.summary(),
+    webKeys: secretStore.list(),
+    secretStore: {
+      masterKeyOnDisk: secretStore.hasMasterKeyOnDisk(),
+      masterKeyInEnv: secretStore.hasMasterKeyInEnv()
+    },
+    providerTemplates: PROVIDER_TEMPLATES.map((t) => ({ ...t })),
+    providerCapabilities: providerRegistry.toJSON(),
+    recentRequests: requestLog.recent(REQUEST_LOG_CAPACITY),
+    requestStats: buildRequestStats(),
+    relayAuth: describeAuth(relayAuth)
+  };
 }
 
 /** @returns {object} */
@@ -368,8 +460,10 @@ function extractActiveProfileName(value) {
 
 /** @returns {object} */
 function usageSummary() {
-  usage.resetIfNeeded();
-  return { day: usage.day(), daily: usage.current().daily, history: usage.summary(config.history.retentionDays).history, historyDays: config.history.retentionDays, runtime: usage.current().runtime, metrics: usage.metrics(), limits: { dailyRequests: config.limits.dailyRequests, routes: config.limits.routes, providers: config.limits.providers, models: config.limits.models } };
+  // usage.summary() 内部已调用 resetIfNeeded() 并计算 metrics()，
+  // 直接复用其结果，避免重复调用 resetIfNeeded()、metrics() 等。
+  const summary = usage.summary(config.history.retentionDays);
+  return { day: summary.day, daily: summary.daily, history: summary.history, historyDays: config.history.retentionDays, runtime: summary.runtime, metrics: summary.metrics, limits: { dailyRequests: config.limits.dailyRequests, routes: config.limits.routes, providers: config.limits.providers, models: config.limits.models } };
 }
 
 /** @param {string} routeName @returns {number} */
@@ -405,7 +499,7 @@ function isStreamRequested(payload) {
 /** @param {*} value @returns {string[]} */
 function extractModelIds(value) {
   const data = Array.isArray(value?.data) ? value.data : Array.isArray(value?.models) ? value.models : [];
-  return data.map((item) => (typeof item === "string" ? item : item?.id || item?.name || "")).map((s) => String(s).trim()).filter(Boolean).slice(0, 500);
+  return data.map((item) => (typeof item === "string" ? item : item?.id || item?.name || "")).map((s) => String(s).trim()).filter(Boolean).slice(0, MODEL_DISCOVERY_MAX_RESULTS);
 }
 
 /** @param {import("node:http").IncomingMessage} req @returns {string} */
@@ -442,7 +536,7 @@ async function testProviderWithKey(provider, keyValue, providerName, requestedMo
   const path = provider.apiFormat === "anthropic" ? "/messages" : "/chat/completions";
   const upstreamBody = provider.apiFormat === "anthropic" ? { model, max_tokens: 8, messages: [{ role: "user", content: "ping" }] } : payload;
   try {
-    const response = await fetch(`${provider.baseUrl}${path}`, { method: "POST", headers, body: JSON.stringify(upstreamBody), signal: AbortSignal.timeout(15000) });
+    const response = await fetch(`${provider.baseUrl}${path}`, { method: "POST", headers, body: JSON.stringify(upstreamBody), signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
     const responseText = await response.text();
     const elapsedMs = Date.now() - startedAt;
     const result = { ok: response.ok, provider: providerName, model, status: response.status, elapsedMs, body: response.ok ? "ok" : parseMaybeJson(responseText) };
@@ -473,7 +567,7 @@ async function discoverProviderModels(provider) {
   if (provider.extraHeaders && typeof provider.extraHeaders === "object") Object.assign(headers, provider.extraHeaders);
   const startedAt = Date.now();
   try {
-    const response = await fetch(`${provider.baseUrl}/models`, { method: "GET", headers, signal: AbortSignal.timeout(15000) });
+    const response = await fetch(`${provider.baseUrl}/models`, { method: "GET", headers, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
     const responseText = await response.text();
     const parsed = parseMaybeJson(responseText);
     const models = response.ok ? extractModelIds(parsed) : [];
@@ -506,7 +600,7 @@ async function checkProviderBalance(provider) {
     else headers.authorization = `Bearer ${key.value}`;
   }
   try {
-    const response = await fetch(guard.url, { method: guard.method, headers, signal: AbortSignal.timeout(10000), redirect: "manual" });
+    const response = await fetch(guard.url, { method: guard.method, headers, signal: AbortSignal.timeout(BALANCE_REQUEST_TIMEOUT_MS), redirect: "manual" });
     const responseText = response.type === "opaqueredirect" ? "" : await response.text().then((t) => t.slice(0, 65536));
     const elapsedMs = Date.now() - startedAt;
     const result = interpretBalanceResponse({ response, responseText, fieldMap: endpoint.fieldMap, providerName: provider.name, endpointUrl: guard.url, elapsedMs });
@@ -595,7 +689,8 @@ const allHandlers = {};
 for (const key of [...Object.getOwnPropertyNames(adminHandlers), ...Object.getOwnPropertyNames(proxyHandlers)]) {
   allHandlers[key] = (adminHandlers[key] !== undefined) ? adminHandlers[key] : proxyHandlers[key];
 }
-const router = createRouter(allHandlers, extendedCtx);
+const rateLimiter = createRateLimiter(config.rateLimiter);
+const router = createRouter(allHandlers, extendedCtx, rateLimiter);
 const server = createServer(router);
 
 server.listen(port, "127.0.0.1", () => {
@@ -615,14 +710,14 @@ function shutdown(signal) {
     if (healthCheckTimer) clearInterval(healthCheckTimer);
     persistRuntimeState();
     const flushed = flushRuntimeState();
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("flush timeout")), 3000));
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("flush timeout")), STATE_FLUSH_TIMEOUT_MS));
     try {
       await Promise.race([flushed, timeout]);
     } catch {
       console.warn("[RelayForge] runtime state flush timed out, forcing exit");
     }
     server.close(() => { process.exit(0); });
-    setTimeout(() => { process.exit(1); }, 5000);
+    setTimeout(() => { process.exit(1); }, SERVER_SHUTDOWN_TIMEOUT_MS);
   };
 }
 process.on("SIGINT", shutdown("SIGINT"));
