@@ -65,6 +65,9 @@ export function createRouter(handlers, ctx) {
       if (req.method === "POST" && req.url === "/admin/balance") return handlers.handleCheckBalance(req, res);
       if (req.method === "GET" && (req.url === "/admin/keys" || req.url.startsWith("/admin/keys?"))) return handlers.handleListKeys(req, res);
       if (req.method === "GET" && req.url === "/admin/auth/token") return handlers.handleGetAuthToken(req, res);
+      if (req.method === "GET" && req.url === "/admin/config/reload-status") return handlers.handleConfigReloadStatus(req, res);
+      if (req.method === "GET" && req.url === "/admin/limits") return handlers.handleGetLimits(req, res);
+      if (req.method === "PATCH" && req.url === "/admin/limits") return handlers.handleUpdateLimits(req, res);
       if (req.method === "GET" && req.url === "/admin/keystore-status") {
         if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
         return ctx.sendJson(res, {

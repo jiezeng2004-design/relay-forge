@@ -1,4 +1,4 @@
-﻿import { createServer } from "node:http";
+import { createServer } from "node:http";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,7 +9,7 @@ import { normalizeUsage, estimateMessagesTokens, pickFamily } from "./token-esti
 import { validateConfig } from "./config-schema.js";
 import { renderDashboard } from "./dashboard.js";
 import { renderProviderTableRow as renderDashboardProviderRow } from "./dashboard/rows.js";
-import { renderOverviewTab, renderProvidersTab, renderRoutesTab, renderToolCards, renderUsageTab, renderSettingsTab, renderIdeTab } from "./dashboard/tabs/index.js";
+import { renderOverviewTab, renderProvidersTab, renderRoutesTab, renderToolCards, renderUsageTab, renderSettingsTab, renderIdeTab, renderRateLimitingTab } from "./dashboard/tabs/index.js";
 import { SecretStore } from "./secret-store.js";
 import { buildErrorEntry, isValidCategory } from "./error-category.js";
 import { copyResponseHeaders, escapeHtml, forbiddenCors, isAdminPath, isAllowedAdminOrigin, isAuthorized, isAuthorizedV1, parseMaybeJson, readJsonBody, sendHtml, sendJson, sendNoContent, setAuthContext, unauthorized, withCorsHeaders } from "./http-helpers.js";
@@ -21,6 +21,9 @@ import { createAnthropicToOpenAiSseBridge, createOpenAiToAnthropicSseBridge } fr
 import { I18N_SUPPORTED_LOCALES, I18N_DEFAULT_LOCALE } from "./i18n.js";
 import { describeAuth, maskToken, resolveRelayAuth } from "./auth.js";
 import { createRuntimeStatePersister } from "./runtime-state.js";
+import { startConfigWatcher } from "./config-watcher.js";
+import { renderTokenPrompt } from "./dashboard/token-prompt.js";
+import { renderErrorRow, classifyErrorCounts, topUsageLabel, formatTimestamp, buildProfileDefaultOptions, renderRouteRow } from "./dashboard/fragments.js";
 import { selectRoute, orderCandidates, resolveActiveProfile as resolveLibActiveProfile, getResolvedRouteDailyLimit } from "./lib/route-logic.js";
 import { sanitizedConfig as sanitizedConfigOps, editableConfig as editableConfigOps, serializeEditableConfig, applyEditableConfig as applyEditableConfigOps, sanitizeProviderInput, sanitizeRouteInput, sanitizeProfileInput, isKnownModelRef, providerNameFromUrl, routeNameFromUrl, keyIdFromUrl, providerNameFromKeyUrl, getWritableConfigPath, collectProviderReferences, collectRouteReferences, buildWebKeysByProvider, findForbiddenSecretFields, validateEditableConfig } from "./lib/config-ops.js";
 import { createAdminHandlers } from "./handlers/admin.js";
@@ -66,8 +69,11 @@ let activeProfile = resolveActiveProfile(extractActiveProfileName(persistedState
 let healthCheckTimer = null;
 let healthCheckRunning = false;
 
+const configReload = { lastReloadAt: null, ok: true, message: "not yet triggered", count: 0 };
+let configWatcherHandle = null;
+
 const requestLog = new RequestLog(20);
-const providerRegistry = createProviderRegistry(config.providers);
+let providerRegistry = createProviderRegistry(config.providers);
 
 const port = Number(process.env.RELAYFORGE_PORT || process.env.PORT || process.env.OPENRELAY_PORT || DEFAULT_PORT);
 
@@ -160,75 +166,6 @@ async function runScheduledHealthChecks() {
   } finally { healthCheckRunning = false; }
 }
 
-/** @param {number} port @returns {string} */
-function renderTokenPrompt(port) {
-  return `<!doctype html>
-<html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RelayForge 管理 Token</title>
-<style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;background:#f6f7f9;color:#172033}main{width:min(540px,calc(100vw - 32px));background:#fff;border:1px solid #d9e0ea;border-radius:8px;padding:24px}h1{margin:0 0 8px;font-size:22px}p{color:#657184;line-height:1.6;font-size:14px}.hint{background:#f0f4ff;border:1px solid #d0d9f5;border-radius:6px;padding:10px 14px;margin:12px 0;font-size:13px;color:#34436b;line-height:1.5}.hint code{background:#e0e8ff;padding:1px 5px;border-radius:3px;font-size:12px}input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #d9e0ea;border-radius:6px;font:inherit;font-size:14px}input:focus{border-color:#2563eb;outline:none;box-shadow:0 0 0 2px rgba(37,99,235,0.15)}button{margin-top:12px;padding:9px 16px;border:1px solid #2563eb;border-radius:6px;background:#2563eb;color:#fff;font:inherit;font-size:14px;cursor:pointer}button:hover{background:#1d4ed8}.msg{margin-top:10px;color:#b42318;font-size:13px}.msg.ok{color:#16a34a}code{background:#edf2f7;padding:2px 5px;border-radius:4px;font-size:13px}</style></head>
-<body><main><h1>需要输入管理 Token</h1><p>管理页已启用本地鉴权。Token 只保存在浏览器 <code>sessionStorage</code>，不会写入磁盘、URL 或日志。关闭浏览器标签页后 Token 自动清除。</p>
-<div class="hint"><strong>Token 获取方式：</strong><br>
-1. 终端启动日志第一行会打印：<code>local relay token: abc12...wxyz (auto-generated)</code><br>
-2. 配置文件 <code>.env</code> 中设置 <code>RELAYFORGE_TOKEN=你的值</code><br>
-3. 兼容旧变量：<code>RELAY_TOKEN</code> / <code>OPENRELAY_TOKEN</code><br>
-4. 自动生成路径：<code>data/security/relay-token</code></div>
-<input id="token" type="password" autocomplete="off" placeholder="粘贴 RELAYFORGE_TOKEN"><button id="login" type="button">进入管理页</button><div id="msg" class="msg"></div>
-<script>const i=document.getElementById("token"),m=document.getElementById("msg");const oldToken=sessionStorage.getItem("openrelay.adminToken");const newToken=sessionStorage.getItem("relayforge.adminToken");i.value=newToken||oldToken||"";async function login(){const t=i.value.trim();if(!t){m.textContent="请输入 RELAYFORGE_TOKEN";m.className="msg";return}sessionStorage.setItem("relayforge.adminToken",t);if(oldToken)sessionStorage.removeItem("openrelay.adminToken");try{const r=await fetch("/",{headers:{authorization:"Bearer "+t}});if(r.status===401){m.textContent="Token 不正确或已过期，请检查 .env 或启动日志";m.className="msg";return}if(!r.ok){m.textContent="验证失败："+r.status+"，请检查 .env 或启动日志";m.className="msg";return}const x=await r.text();document.open();document.write(x);document.close()}catch(e){m.textContent="连接失败，1秒后重试";m.className="msg";setTimeout(login,1000)}}document.getElementById("login").addEventListener("click",login);i.addEventListener("keydown",e=>{if(e.key==="Enter")login()});if(i.value){m.textContent="检测到已有 Token，正在自动登录…";m.className="msg ok";login();}</script></main></body></html>`;
-}
-
-/** @param {object} entry @returns {string} */
-function renderErrorRow(entry) {
-  const time = entry.scope || "";
-  const cat = entry.category ? `<span class="pill warn">${escapeHtml(entry.category)}</span>` : "";
-  const msg = escapeHtml((entry.message || entry.error || "")).slice(0, 120);
-  return `<tr><td class="mono">${escapeHtml(time)}</td><td>${cat}</td><td class="mono">${msg}</td></tr>`;
-}
-
-/** @param {Array} errors @returns {object} */
-function classifyErrorCounts(errors) {
-  const counts = {};
-  for (const e of errors) { const cat = e.category || "unknown"; counts[cat] = (counts[cat] || 0) + 1; }
-  return counts;
-}
-
-/** @param {object|null} data @returns {string} */
-function topUsageLabel(data) {
-  if (!data || typeof data !== "object") return "";
-  const entries = Object.entries(data).sort((a, b) => b[1] - a[1]);
-  return entries.length > 0 ? entries[0][0] : "";
-}
-
-/** @param {object} status @returns {Array<{value: string, label: string}>} */
-function buildProfileDefaultOptions(status) {
-  const out = [];
-  for (const p of status.profiles?.profiles || []) out.push({ value: p.name, label: `个人设置: ${p.name}` });
-  for (const r of status.routes || []) out.push({ value: r.name, label: `模型组: ${r.name} (${r.strategy})` });
-  for (const prov of status.providers || []) { for (const m of prov.models || []) out.push({ value: `${prov.name}:${m}`, label: `${prov.displayName||prov.name}: ${m}` }); }
-  return out;
-}
-
-/** @param {string|null|undefined} ts @returns {string} */
-function formatTimestamp(ts) {
-  if (!ts) return "";
-  try { return new Date(ts).toLocaleString("zh-CN", { hour12: false }); } catch { return ts; }
-}
-
-/** @param {object} route @param {object} usage @param {object} limits @returns {string} */
-function renderRouteRow(route, usage, limits) {
-  const today = usage?.daily?.routes?.[route.name] || 0;
-  const lim = route.limits?.dailyRequests || limits?.routes?.[route.name]?.dailyRequests || limits?.dailyRequests || "—";
-  return `<tr><td><strong>${escapeHtml(route.name)}</strong>${route.description?`<div class="muted">${escapeHtml(route.description)}</div>`:""}</td><td>${escapeHtml(route.strategy)}</td><td>${route.candidates.map((c)=>escapeHtml(c.provider+":"+c.model)).join(", ")}</td><td>${today}</td><td>${lim}</td></tr>`;
-}
-
-/** @param {object} provider @param {object} webKeysByProvider @param {object} healthCache @param {object} keys @returns {string} */
-function renderProviderTableRow(provider, webKeysByProvider, healthCache, keys) {
-  const wc = (webKeysByProvider[provider.name]||[]).filter((k)=>k.enabled).length;
-  const ek = provider.keyCount || 0;
-  const keyInfo = provider.local ? "本地模型无需 Key" : wc > 0 ? `${wc} 个 Web Key` : ek > 0 ? `${ek} 个环境变量 Key` : "未添加 Key";
-  const health = healthCache[provider.name];
-  return `<tr><td><strong>${escapeHtml(provider.displayName||provider.name)}</strong><div class="muted">${escapeHtml(provider.baseUrl)}</div></td><td>${escapeHtml(provider.apiFormat)}</td><td>${keyInfo}</td><td>${health?`<span class="pill ${health.ok?"ok":"bad"}">${health.ok?"正常":"失败"}</span>`:"—"}</td><td>${escapeHtml((provider.models||[]).slice(0,3).join(", "))}</td></tr>`;
-}
-
 /** @param {string} tab @param {object} status @param {number} port @param {string} locale @returns {string|null} */
 function renderSingleTab(tab, status, port, locale) {
   const webKeys = status.webKeys || [];
@@ -278,6 +215,7 @@ function renderSingleTab(tab, status, port, locale) {
     case "usage": return renderUsageTab({ usageRows, historyRows, errorRows, errorCounts, errors, port, status });
     case "settings": return renderSettingsTab({ healthRows, discoveryRows, balanceRows, port, status });
     case "ide": return renderIdeTab(status, port);
+    case "rate-limiting": return renderRateLimitingTab({ status, port });
     default: return null;
   }
 }
@@ -329,7 +267,7 @@ async function discoverModelsByUrl({ baseUrl, apiKey }) {
 /** @returns {object} */
 function buildStatus() {
   usage.resetIfNeeded();
-  return { ok: true, version: packageVersion, modelAliases: config.modelAliases || {}, startedAt: stats.startedAt, configPath, statePath, providers: config.providers.map((p) => ({ name: p.name, displayName: p.displayName || "", baseUrl: p.baseUrl, apiFormat: p.apiFormat, keyEnv: p.keyEnv, allowInsecureHttp: p.allowInsecureHttp === true, insecureHttpRisk: p.allowInsecureHttp === true && String(p.baseUrl).startsWith("http://") && !isLocalProvider(p), local: isLocalProvider(p), healthHint: providerHealthHint(p), keyCount: getProviderKeys(p).length, models: p.models, extraHeaders: p.extraHeaders || null, balanceEndpoint: p.balanceEndpoint || null })), routes: config.routes.map((rt) => ({ name: rt.name, description: rt.description || "", strategy: rt.strategy, limits: rt.limits || {}, candidates: rt.candidates })), combos: config.combos || [], routeReferences: Object.fromEntries(config.routes.map((rt) => [rt.name, collectRouteReferences(rt.name, config)])), routeTemplates: ROUTE_TEMPLATES.map((t) => JSON.parse(JSON.stringify(t))), profiles: profileSummary(), stats, usage: usageSummary(), healthCache, modelDiscoveryCache, balanceCache, recentErrors, providerHealth: providerHealth.summary(), healthChecks: { enabled: config.healthChecks.enabled, intervalMinutes: config.healthChecks.intervalMinutes, providers: config.healthChecks.providers }, keys: keyPool.summary(), webKeys: secretStore.list(), secretStore: { masterKeyOnDisk: secretStore.hasMasterKeyOnDisk(), masterKeyInEnv: secretStore.hasMasterKeyInEnv() }, providerTemplates: PROVIDER_TEMPLATES.map((t) => ({ ...t })), providerCapabilities: providerRegistry.toJSON(), recentRequests: requestLog.recent(20), requestStats: requestLog.size > 0 ? computeStats(requestLog.recent(100)) : { total: 0, success: 0, failed: 0, avgLatencyMs: 0, byModel: {}, byProvider: {}, byError: {} }, relayAuth: describeAuth(relayAuth) };
+  return { ok: true, version: packageVersion, modelAliases: config.modelAliases || {}, startedAt: stats.startedAt, configPath, statePath, providers: config.providers.map((p) => ({ name: p.name, displayName: p.displayName || "", baseUrl: p.baseUrl, apiFormat: p.apiFormat, keyEnv: p.keyEnv, allowInsecureHttp: p.allowInsecureHttp === true, insecureHttpRisk: p.allowInsecureHttp === true && String(p.baseUrl).startsWith("http://") && !isLocalProvider(p), local: isLocalProvider(p), healthHint: providerHealthHint(p), keyCount: getProviderKeys(p).length, models: p.models, extraHeaders: p.extraHeaders || null, balanceEndpoint: p.balanceEndpoint || null })), routes: config.routes.map((rt) => ({ name: rt.name, description: rt.description || "", strategy: rt.strategy, limits: rt.limits || {}, candidates: rt.candidates })), combos: config.combos || [], routeReferences: Object.fromEntries(config.routes.map((rt) => [rt.name, collectRouteReferences(rt.name, config)])), routeTemplates: ROUTE_TEMPLATES.map((t) => JSON.parse(JSON.stringify(t))), profiles: profileSummary(), stats, usage: usageSummary(), healthCache, modelDiscoveryCache, balanceCache, recentErrors, providerHealth: providerHealth.summary(), healthChecks: { enabled: config.healthChecks.enabled, intervalMinutes: config.healthChecks.intervalMinutes, providers: config.healthChecks.providers }, keys: keyPool.summary(), webKeys: secretStore.list(), secretStore: { masterKeyOnDisk: secretStore.hasMasterKeyOnDisk(), masterKeyInEnv: secretStore.hasMasterKeyInEnv() }, providerTemplates: PROVIDER_TEMPLATES.map((t) => ({ ...t })), providerCapabilities: providerRegistry.toJSON(), recentRequests: requestLog.recent(20), requestStats: requestLog.size > 0 ? computeStats(requestLog.recent(100)) : { total: 0, success: 0, failed: 0, avgLatencyMs: 0, byModel: {}, byProvider: {}, byError: {} }, relayAuth: describeAuth(relayAuth), configReload: { lastReloadAt: configReload.lastReloadAt, ok: configReload.ok, message: configReload.message, count: configReload.count } };
 }
 
 /** @returns {object} */
@@ -522,6 +460,48 @@ async function checkProviderBalance(provider) {
   }
 }
 
+function reloadConfigFromDisk(rawConfig) {
+  const previousConfig = config;
+  const previousKeyPool = keyPool;
+  const previousActiveProfile = activeProfile;
+  const previousProviderRegistry = providerRegistry;
+  try {
+    const normalized = normalizeConfig(JSON.parse(JSON.stringify(rawConfig)));
+    const validation = validateConfig(normalized);
+    if (!validation.ok) {
+      const detail = validation.errors.map((e) => `${e.path || "(root)"}: ${e.message}`).join("; ");
+      throw new Error(`config validation failed: ${detail}`);
+    }
+    config = normalized;
+    keyPool = new KeyPool(config.providers, getProviderKeys, config.retry.cooldownMs, { secretStore });
+    providerRegistry = createProviderRegistry(config.providers);
+    activeProfile = resolveActiveProfile(extractActiveProfileName(activeProfile) || config.activeProfile)?.name || config.activeProfile || null;
+    usage.setRetentionDays(config.history.retentionDays);
+    routeRuntime.clear();
+    scheduleHealthChecks();
+    syncAppState();
+    persistRuntimeState();
+    configReload.lastReloadAt = new Date().toISOString();
+    configReload.ok = true;
+    configReload.message = `reloaded ${config.providers.length} providers, ${config.routes.length} routes`;
+    configReload.count += 1;
+    console.log(`[RelayForge] config reloaded from disk (${configReload.message})`);
+  } catch (error) {
+    config = previousConfig;
+    keyPool = previousKeyPool;
+    activeProfile = previousActiveProfile;
+    providerRegistry = previousProviderRegistry;
+    routeRuntime.clear();
+    scheduleHealthChecks();
+    syncAppState();
+    configReload.lastReloadAt = new Date().toISOString();
+    configReload.ok = false;
+    configReload.message = error.message;
+    recordError("config:hot-reload", error, "config_error", { providers: previousConfig.providers.length });
+    console.warn(`[RelayForge] config hot-reload failed, kept previous config: ${error.message}`);
+  }
+}
+
 const appState = { config: null, configPath: null, keyPool: null, activeProfile: null };
 
 function syncAppState() {
@@ -583,7 +563,9 @@ const ctx = {
   openAiResponseToResponses, anthropicResponseToResponses, responsesToChatPayload,
   createAnthropicToOpenAiSseBridge, createOpenAiToAnthropicSseBridge,
   guardBalanceEndpoint, interpretBalanceResponse, resolveRoutePreview,
-  describeAuth, maskToken, I18N_SUPPORTED_LOCALES, I18N_DEFAULT_LOCALE
+  describeAuth, maskToken, I18N_SUPPORTED_LOCALES, I18N_DEFAULT_LOCALE,
+  configReload,
+  reloadConfigFromDisk
 };
 syncAppState();
 
@@ -606,12 +588,27 @@ server.listen(port, "127.0.0.1", () => {
     console.log("Port 18765: RelayForge ready — OpenAI/Anthropic compatible endpoint at /v1.");
   }
   console.log(`Config: ${configPath}`);
+  console.log("Config hot-reload: enabled (edit config.json to apply changes without restart)");
   scheduleHealthChecks();
+  if (configPath && existsSync(configPath)) {
+    configWatcherHandle = startConfigWatcher({
+      configPath,
+      lockDir: keystoreDir,
+      onReload: (rawConfig) => reloadConfigFromDisk(rawConfig),
+      onError: (error, context) => {
+        configReload.lastReloadAt = new Date().toISOString();
+        configReload.ok = false;
+        configReload.message = `${context}: ${error.message}`;
+        if (process.env.OPENRELAY_DEBUG) console.warn(`[RelayForge] config-watcher error (${context}): ${error.message}`);
+      }
+    });
+  }
 });
 
 function shutdown(signal) {
   return async () => {
     console.log(`\n[RelayForge] ${signal} received, shutting down...`);
+    if (configWatcherHandle) configWatcherHandle.stop();
     if (healthCheckTimer) clearInterval(healthCheckTimer);
     persistRuntimeState();
     const flushed = flushRuntimeState();

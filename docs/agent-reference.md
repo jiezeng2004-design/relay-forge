@@ -12,7 +12,7 @@ Formerly known internally as `openrelay-like`.
 
 ## Current version
 
-0.3.1 (see `package.json` and `CHANGELOG.md`).
+0.3.3 (see `package.json` and `CHANGELOG.md`).
 
 ## Combo Models
 
@@ -91,12 +91,17 @@ npm.cmd start                  # run the relay on http://127.0.0.1:18765
 
 ### Source layout
 
-- `src/server.js` - thin wiring module (~600 lines); state init, context wiring, handler factory calls
-- `src/router.js` - request dispatch table (~80 lines); `createRouter(handlers, ctx)` -> `handleRequest(req, res)`
+- `src/server.js` - thin wiring module (~626 lines); state init, context wiring, handler factory calls, config watcher startup
+- `src/router.js` - request dispatch table (~115 lines); `createRouter(handlers, ctx)` -> `handleRequest(req, res)`
 - `src/lib/route-logic.js` - pure business logic: `selectRoute`, `orderCandidates`, `buildStatus`, route strategy
 - `src/lib/config-ops.js` - config editing/validation/serialization: `applyEditableConfig`, `sanitizeProviderInput`, etc.
-- `src/handlers/admin.js` - factory `createAdminHandlers(ctx)` -> all /admin/* CRUD handlers
+- `src/handlers/admin.js` - factory `createAdminHandlers(ctx)` -> all /admin/* CRUD handlers (incl. `handleConfigReloadStatus`, `handleGetLimits`, `handleUpdateLimits`)
 - `src/handlers/proxy.js` - factory `createProxyHandlers(ctx)` -> proxy/streaming/chat handlers
+- `src/config-watcher.js` - **v0.3.3** — `startConfigWatcher({configPath, lockDir, onReload, onError, debounceMs})`. `fs.watch` + 500 ms debounce + `O_EXCL` lock. Returns `{ stop() }`. Pure state machine, no ctx dependency.
+- `src/dashboard/token-prompt.js` - **v0.3.3** — extracted `renderTokenPrompt(port)` from server.js
+- `src/dashboard/fragments.js` - **v0.3.3** — extracted `renderErrorRow`, `classifyErrorCounts`, `topUsageLabel`, `formatTimestamp`, `buildProfileDefaultOptions`, `renderRouteRow` from server.js
+- `src/dashboard/tabs/rate-limiting.js` - **v0.3.3** — `renderRateLimitingTab({status, port})`. 429 / local-limit / cooldown visuals + embedded form posting to `PATCH /admin/limits`.
+- `Dockerfile` + `.dockerignore` + `docker-compose.yml` - **v0.3.3** — official GHCR image, non-root `node` user, `VOLUME /app/data`, optional Ollama sidecar behind `--profile local`.
 
 ### Existing modules (unchanged)
 
@@ -126,12 +131,15 @@ npm.cmd start                  # run the relay on http://127.0.0.1:18765
 - `src/key-pool.js` - key rotation + cooldown
 - `src/balance.js` - read-only balance endpoint guard
 - `src/http-helpers.js` - `sendJson`, `sendHtml`, `withCorsHeaders`, `isAuthorized`, `isAuthorizedV1`, `setAuthContext`
-- `src/dashboard/` - split dashboard renderer; inline client JS extracted to `static/dashboard-client.js`
+- `src/dashboard/` - split dashboard renderer; inline client JS extracted to `static/dashboard-client.js`; **v0.3.3** exports `renderRateLimitingTab` via `tabs/index.js`
 - `scripts/doctor.mjs` + `scripts/doctor-lib.mjs` - redacted local diagnostic
-- `scripts/` - 25+ test / build scripts
+- `scripts/test-config-watcher.mjs` - **v0.3.3** — 13 tests covering basic reload, bad-JSON, debounce coalesce, stop, stale-lock recovery, file deletion
+- `scripts/test-rate-limiting-tab.mjs` - **v0.3.3** — 19 tests covering empty/populated/cooldown/unlimited states
+- `scripts/strip-bom.mjs` - **v0.3.3** — strips UTF-8 BOM from `src/**/*.js` and `i18n/**/*.json`; runs as a `build-dist` pre-step
+- `scripts/` - 30+ test / build scripts
 - `i18n/{zh,en}.json` - UI string bundles; keep key parity
 - `.github/workflows/ci.yml` - Node 18 / 20 / 22 x ubuntu-latest / windows-latest
-- `.github/workflows/release.yml` - tag-triggered release (test -> build-dist -> GitHub Release)
+- `.github/workflows/release.yml` - tag-triggered release (test -> build-dist -> GitHub Release -> **v0.3.3** docker build & push to GHCR)
 
 ## When you make changes
 

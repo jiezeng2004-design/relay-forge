@@ -1,0 +1,54 @@
+# Keep the image lean and free of secrets / dev artifacts.
+# Anything not needed at runtime is excluded here.
+
+# Version control
+.git/
+.gitignore
+
+# Editor / OS cruft
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets and runtime data — operators mount their own.
+.env
+config.json
+data/
+backups/
+
+# Environment helper scripts (preRelease.forbiddenFiles)
+tool-env.ps1
+tool-env.cmd
+tool-env.sh
+tool-verify.ps1
+tool-verify.cmd
+tool-verify.sh
+
+# Release artifacts — never bake packaged zips into the image.
+relayforge-*.zip
+relayforge-*.zip.sha256
+
+# Test / CI / build machinery — not needed at runtime.
+scripts/
+test/
+.github/
+analysis/
+docs/
+
+# Documentation files
+*.md
+LICENSE
+*.doc
+*.docx
+
+# Node artifacts (none expected — zero dependencies — but just in case)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Allowlist: .env.example and config.example.json are NOT ignored,
+# so the fallback config path and dotenv template remain available.
+!.env.example
+!config.example.json

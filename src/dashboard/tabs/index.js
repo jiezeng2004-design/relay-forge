@@ -10,3 +10,4 @@ export { renderUsageTab } from "./usage.js";
 export { renderSettingsTab } from "./settings.js";
 export { renderToolCards } from "./tools.js";
 export { renderIdeTab } from "./ide.js";
+export { renderRateLimitingTab } from "./rate-limiting.js";

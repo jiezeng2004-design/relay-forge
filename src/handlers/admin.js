@@ -998,7 +998,7 @@ export function createAdminHandlers(ctx) {
       return ctx.sendJson(res, { ok: true, token: "", masked: "" });
     }
     return ctx.sendJson(res, {
-      ok: true,
+ok: true,
       token: ctx.relayAuth.token,
       masked: ctx.relayAuth.masked || maskToken(ctx.relayAuth.token),
       source: ctx.relayAuth.source
@@ -1006,8 +1006,110 @@ export function createAdminHandlers(ctx) {
   }
 
   /**
+   * Returns the config hot-reload status so the Dashboard can show
+   * when config.json was last reloaded and whether it succeeded.
    * @param {import("node:http").IncomingMessage} req
    * @param {import("node:http").ServerResponse} res
+   * @returns {Promise<void>}
+   */
+  async function handleConfigReloadStatus(req, res) {
+    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
+    return ctx.sendJson(res, {
+      ok: true,
+      configReload: ctx.configReload || { lastReloadAt: null, ok: true, message: "not configured", count: 0 }
+    });
+  }
+
+  /**
+   * GET /admin/limits — returns the current limits block without secrets.
+   * @param {import("node:http").IncomingMessage} req
+   * @param {import("node:http").ServerResponse} res
+   * @returns {Promise<void>}
+   */
+  async function handleGetLimits(req, res) {
+    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
+    return ctx.sendJson(res, { ok: true, limits: ctx.config.limits });
+  }
+
+  /**
+   * PATCH /admin/limits — updates dailyRequests thresholds globally,
+   * per-provider, per-route, and per-model. Writes through the same
+   * applyEditableConfig path so the change is persisted to config.json
+   * and hot-reloaded into the running server.
+   * @param {import("node:http").IncomingMessage} req
+   * @param {import("node:http").ServerResponse} res
+   * @returns {Promise<void>}
+   */
+  async function handleUpdateLimits(req, res) {
+    if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
+    const body = await ctx.readJsonBody(req, ctx.config.limits.maxBodyBytes);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return ctx.sendJson(res, { ok: false, error: "invalid_body", message: "Expected a JSON object" }, 400);
+    }
+
+    // Validate the incoming limit fields
+    function validateLimitValue(value, fieldName) {
+      if (value === null || value === undefined || value === "") return null;
+      if (typeof value === "number" && Number.isFinite(value) && Number.isInteger(value) && value > 0) return value;
+      if (typeof value === "string" && /^\d+$/.test(value.trim())) {
+        const n = parseInt(value, 10);
+        if (n > 0) return n;
+      }
+      throw new Error(`${fieldName} must be a positive integer or null, got: ${JSON.stringify(value)}`);
+    }
+
+    let dailyRequests, providers, routes, models;
+    try {
+      dailyRequests = validateLimitValue(body.dailyRequests, "dailyRequests");
+      providers = {};
+      if (body.providers && typeof body.providers === "object" && !Array.isArray(body.providers)) {
+        for (const [name, block] of Object.entries(body.providers)) {
+          if (!block || typeof block !== "object") throw new Error(`providers.${name} must be an object`);
+          const v = validateLimitValue(block.dailyRequests, `providers.${name}.dailyRequests`);
+          if (v !== null) providers[name] = { dailyRequests: v };
+        }
+      }
+      routes = {};
+      if (body.routes && typeof body.routes === "object" && !Array.isArray(body.routes)) {
+        for (const [name, block] of Object.entries(body.routes)) {
+          if (!block || typeof block !== "object") throw new Error(`routes.${name} must be an object`);
+          const v = validateLimitValue(block.dailyRequests, `routes.${name}.dailyRequests`);
+          if (v !== null) routes[name] = { dailyRequests: v };
+        }
+      }
+      models = {};
+      if (body.models && typeof body.models === "object" && !Array.isArray(body.models)) {
+        for (const [name, block] of Object.entries(body.models)) {
+          if (!block || typeof block !== "object") throw new Error(`models.${name} must be an object`);
+          const v = validateLimitValue(block.dailyRequests, `models.${name}.dailyRequests`);
+          if (v !== null) models[name] = { dailyRequests: v };
+        }
+      }
+    } catch (error) {
+      return ctx.sendJson(res, { ok: false, error: "invalid_limits", message: error.message }, 400);
+    }
+
+    // Build a full editable config with the new limits merged in
+    const editable = ctx.editableConfig();
+    const newLimits = { ...editable.limits };
+    if (body.dailyRequests !== undefined) newLimits.dailyRequests = dailyRequests;
+    if (Object.keys(providers).length > 0) newLimits.providers = { ...newLimits.providers, ...providers };
+    if (Object.keys(routes).length > 0) newLimits.routes = { ...newLimits.routes, ...routes };
+    if (Object.keys(models).length > 0) newLimits.models = { ...newLimits.models, ...models };
+    const candidate = { ...editable, limits: newLimits };
+
+    try {
+      const result = ctx.applyEditableConfig(candidate, "update-limits");
+      return ctx.sendJson(res, { ok: true, ...result });
+    } catch (error) {
+      return ctx.sendJson(res, { ok: false, error: "update_failed", message: error.message }, 500);
+    }
+  }
+
+  /**
+   * @param {import("node:http").IncomingMessage} req
+   * @param {import("node:http").ServerResponse} res
+   * @returns {Promise<void>}
    */
   async function handleIdeProxyPreview(req, res) {
     if (!ctx.isAuthorized(req)) return ctx.unauthorized(res);
@@ -1375,6 +1477,9 @@ export function createAdminHandlers(ctx) {
     handleTestKey,
     handleTestRawKey,
     handleGetAuthToken,
+    handleConfigReloadStatus,
+    handleGetLimits,
+    handleUpdateLimits,
     handleSetLocale,
     handleTestAll,
     handleProviderTestPreview,

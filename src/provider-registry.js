@@ -52,7 +52,7 @@ export const ROUTE_TEMPLATES = [
 
 export const LOCAL_PROVIDER_NAMES = new Set(["ollama", "lm-studio", "vllm", "llama-cpp", "llama.cpp", "llamafile"]);
 
-export const SUPPORTED_TABS = new Set(["overview", "providers", "routes", "tools", "usage", "settings", "ide"]);
+export const SUPPORTED_TABS = new Set(["overview", "providers", "routes", "tools", "usage", "settings", "ide", "rate-limiting"]);
 
 export const V1_PROXY_PATHS = new Set(["/v1/chat/completions", "/v1/responses", "/v1/messages"]);
 

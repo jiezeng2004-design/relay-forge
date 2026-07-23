@@ -6,6 +6,10 @@ export function renderSettingsTab(ctx) {
   const privacy = status.privacy || {};
   const tokenSource = relayAuth.tokenSource || "unset";
   const maskedToken = relayAuth.apiKeyMasked || relayAuth.apiKeyHint || "not shown";
+  const reload = status.configReload || {};
+  const reloadBanner = reload.lastReloadAt
+    ? `<div class="notice ${reload.ok ? "ok" : "bad"}" style="margin-bottom:16px;"><strong>Config hot-reload</strong> — <span class="pill ${reload.ok ? "ok" : "bad"}">${reload.ok ? "success" : "failed"}</span> ${escapeHtml(reload.message || "")} <span class="muted">(#${reload.count || 0} at ${escapeHtml(String(reload.lastReloadAt))})</span></div>`
+    : `<div class="notice" style="margin-bottom:16px;"><strong>Config hot-reload</strong> — <span class="pill ok">enabled</span> <span class="muted">Edit config.json on disk to apply changes without restarting the server.</span></div>`;
   return `
 <div class="rf-page-head">
   <div>
@@ -13,6 +17,7 @@ export function renderSettingsTab(ctx) {
     <p class="rf-page-desc">Manage local session auth, privacy posture, appearance, compatibility names, and editable non-secret config.</p>
   </div>
 </div>
+${reloadBanner}
 
 <div class="grid grid-2">
   <div class="panel">

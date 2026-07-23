@@ -22,7 +22,9 @@
 - Plugin-like provider templates
 - More AI coding client presets
 - Optional local encrypted secrets
-- Optional Docker deployment
+- Docker deployment ✓ shipped in v0.3.3
+- Config hot-reload ✓ shipped in v0.3.3
+- Rate limiting dashboard ✓ shipped in v0.3.3
 
 ## Explicitly not planned
 

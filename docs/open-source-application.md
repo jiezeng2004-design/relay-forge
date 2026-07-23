@@ -16,13 +16,12 @@ privacy-first request logs, and lightweight usage analytics.
 
 Repository: https://github.com/jiezeng2004-design/relay-forge
 
-Latest GitHub Release tag: `v0.3.2`
+Latest GitHub Release tag: `v0.3.3`
 
-Current package / ZIP artifact version: `0.3.1`
+Current package / ZIP artifact version: `0.3.3`
 
-Release note: the `v0.3.2` GitHub Release is release-workflow polish. Its
-published artifact is still `relayforge-0.3.1.zip`, matching the package
-version in `package.json`.
+Release note: `v0.3.3` adds Docker/GHCR packaging, configuration hot reload,
+and the rate-limiting dashboard with verified `relayforge-0.3.3.zip` assets.
 
 License: MIT
 
@@ -63,8 +62,8 @@ every tool.
   provider configuration, client setup, and security notes.
 - GitHub Actions CI for Linux and Windows.
 - Release artifact verification scripts for `relayforge-<version>.zip` and
-  checksum files; the latest public release tag is `v0.3.2` and includes the
-  verified `relayforge-0.3.1.zip` artifact.
+  checksum files; the latest public release tag is `v0.3.3` and includes the
+  verified `relayforge-0.3.3.zip` artifact.
 - Unit tests, end-to-end tests, dashboard tests, privacy tests, doctor
   redaction tests, and release artifact tests.
 - Local-first privacy documentation in `CONNECTOR_SECURITY.md`,
@@ -93,9 +92,9 @@ by maintainers with their own provider keys.
 
 Public release evidence:
 
-- Latest release: https://github.com/jiezeng2004-design/relay-forge/releases/tag/v0.3.2
-- Artifact: `relayforge-0.3.1.zip`
-- Checksum file: `relayforge-0.3.1.zip.sha256`
+- Latest release: https://github.com/jiezeng2004-design/relay-forge/releases/tag/v0.3.3
+- Artifact: `relayforge-0.3.3.zip`
+- Checksum file: `relayforge-0.3.3.zip.sha256`
 
 ## Current Status
 
