@@ -59,14 +59,23 @@ jobs:
       - name: Build distribution zip
         run: npm run build-dist
 
+      - name: Resolve exact release artifacts
+        id: artifacts
+        shell: bash
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          test "v${version}" = "${GITHUB_REF_NAME}"
+          echo "zip=relayforge-${version}.zip" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3
         with:
           name: RelayForge ${{ github.ref_name }}
           body_path: docs/release-${{ github.ref_name }}.md
           files: |
-            relayforge-*.zip
-            relayforge-*.zip.sha256
+            ${{ steps.artifacts.outputs.zip }}
+            ${{ steps.artifacts.outputs.zip }}.sha256
+          fail_on_unmatched_files: true
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
 
