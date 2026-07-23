@@ -2,7 +2,7 @@
 
 **Release date:** 2026-07-23
 
-**Build still in progress** — this version ships the Phase 1–4 deliverables
+This version ships the Phase 1–4 deliverables
 agreed in the optimization plan dated 2026-06-21. Below is the human-facing
 snapshot of what changed.
 
