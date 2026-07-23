@@ -1,0 +1,58 @@
+# RelayForge — docker-compose example
+#
+# Quick start (cloud providers only):
+#   docker compose up -d
+#
+# With a local Ollama sidecar (optional profile):
+#   docker compose --profile local up -d
+#
+# Then open http://127.0.0.1:18765 and grab the token from:
+#   docker compose logs relayforge | grep "local relay token"
+#
+# Mount your own config.json at /app/config.json to override the
+# bundled config.example.json fallback. The /app/data volume keeps
+# runtime-state.json, the keystore, and the auto-generated relay
+# token across restarts.
+
+services:
+  relayforge:
+    build: .
+    image: ghcr.io/jiezeng2004-design/relayforge:latest
+    container_name: relayforge
+    ports:
+      - "18765:18765"
+    volumes:
+      # Mount your own config.json (read-only) to override config.example.json.
+      # If you omit this, RelayForge falls back to config.example.json.
+      - ./config.json:/app/config.json:ro
+      # Persistent state: runtime-state.json, keystore, relay-token.
+      - relayforge-data:/app/data
+    environment:
+      # Set RELAYFORGE_TOKEN in a .env file next to docker-compose.yml,
+      # or leave unset to let RelayForge auto-generate one into /app/data.
+      RELAYFORGE_TOKEN: ${RELAYFORGE_TOKEN:-}
+      # Optional: override port inside the container (rarely needed).
+      RELAYFORGE_PORT: "18765"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:18765/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Optional local model server. Not started by default — use:
+  #   docker compose --profile local up -d
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["local"]
+    container_name: relayforge-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  relayforge-data:
+  ollama-models:

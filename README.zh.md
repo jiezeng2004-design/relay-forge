@@ -1,11 +1,11 @@
-# RelayForge v0.3.1
+# RelayForge v0.3.3
 
 **零依赖、本地优先的 AI 编程网关** - 兼容 OpenAI / Anthropic 接口。
 RelayForge 可以把本地模型（Ollama / LM Studio）和云端 API providers 统一到 `http://127.0.0.1:18765/v1` 后面，并提供 combo 路由、fallback、请求隐私保护和轻量用量统计。
 
 [![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-0.3.3-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
@@ -54,7 +54,7 @@ RelayForge 可以把本地模型（Ollama / LM Studio）和云端 API providers 
 
 ### A. Windows zip 用户
 
-1. 解压 `relayforge-0.3.1.zip`
+1. 解压 `relayforge-0.3.3.zip`
 2. 双击 **`Start_RelayForge.cmd`**
 3. 打开 http://127.0.0.1:18765
 4. 从启动日志中复制 token
@@ -81,7 +81,44 @@ export RELAYFORGE_PORT="18765"
 node src/server.js
 ```
 
-### D. 用 curl 验证
+### D. Docker 用户
+
+RelayForge 在 GHCR 上提供官方容器镜像，约 60 MB，以非 root 的 `node` 用户运行，
+所有运行时状态保存在 `/app/data` 卷中。
+
+**方式一 — 拉取预构建镜像：**
+
+```bash
+docker run -d --name relayforge \
+  -p 18765:18765 \
+  -v relayforge-data:/app/data \
+  -v ./config.json:/app/config.json:ro \
+  ghcr.io/jiezeng2004-design/relayforge:latest
+```
+
+从日志中获取自动生成的 token：
+
+```bash
+docker logs relayforge 2>&1 | grep "local relay token"
+```
+
+**方式二 — docker compose（含可选 Ollama 本地模型）：**
+
+```bash
+# 仅云端 provider
+docker compose up -d
+
+# 附带本地 Ollama sidecar
+docker compose --profile local up -d
+```
+
+然后打开 http://127.0.0.1:18765，粘贴 `docker compose logs relayforge` 中的 token。
+
+> **安全提示：** 容器不内置 `.env`、`config.json` 或任何 API key。请挂载自己的
+> `config.json`（只读），或在 `docker-compose.yml` 旁的 `.env` 文件中设置
+> `RELAYFORGE_TOKEN`，也可让 RelayForge 自动生成 token 到 `/app/data` 卷。
+
+### E. 用 curl 验证
 
 ```bash
 # 列出模型
@@ -240,9 +277,15 @@ Routes 用来定义具名模型组，可以使用 fallback、round_robin 或 wei
 - light / dark / system 外观模式
 - 更安全的本地优先配置和诊断
 
+### v0.3.3 已完成
+
+- Docker 支持 — GHCR 官方容器镜像，非 root 运行，约 60 MB
+- 配置热重载 — 编辑 `config.json` 无需重启服务
+- 限流可视化面板 — 独立标签页展示 429 统计、Key Pool 冷却、各 provider 配额
+- server.js 模块化瘦身 — 渲染和 provider 探测逻辑迁出到独立模块
+
 ### 下一阶段：v0.4.x
 
-- Docker 支持
 - 配置导入 / 导出
 - Provider 健康检查 UI
 - 更多客户端预设
@@ -258,4 +301,4 @@ Routes 用来定义具名模型组，可以使用 fallback、round_robin 或 wei
 
 ---
 
-[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.1.md)
+[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.3.md)

@@ -1,4 +1,4 @@
-# RelayForge v0.3.1
+# RelayForge v0.3.3
 
 **Zero-dependency local-first AI coding gateway** - OpenAI / Anthropic compatible.
 Unify your local (Ollama / LM Studio) and cloud API providers behind `http://127.0.0.1:18765/v1` with combo routing,
@@ -6,7 +6,7 @@ fallback, request privacy, and lightweight usage analytics.
 
 [![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.1-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-0.3.3-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
@@ -79,7 +79,7 @@ maintainer rationale.
 
 ### A. Windows zip users
 
-1. Unzip `relayforge-0.3.1.zip`
+1. Unzip `relayforge-0.3.3.zip`
 2. Double-click **`Start_RelayForge.cmd`**
 3. Open http://127.0.0.1:18765 in your browser
 4. Copy the token from the startup log
@@ -106,7 +106,45 @@ export RELAYFORGE_PORT="18765"
 node src/server.js
 ```
 
-### D. Verify with curl
+### D. Docker users
+
+RelayForge ships an official container image on GHCR. The image is ~60 MB,
+runs as a non-root `node` user, and keeps all runtime state on a `/app/data` volume.
+
+**Option 1 — pull the prebuilt image:**
+
+```bash
+docker run -d --name relayforge \
+  -p 18765:18765 \
+  -v relayforge-data:/app/data \
+  -v ./config.json:/app/config.json:ro \
+  ghcr.io/jiezeng2004-design/relayforge:latest
+```
+
+Grab the auto-generated token from the logs:
+
+```bash
+docker logs relayforge 2>&1 | grep "local relay token"
+```
+
+**Option 2 — docker compose (with optional Ollama sidecar):**
+
+```bash
+# Cloud providers only
+docker compose up -d
+
+# With a local Ollama sidecar
+docker compose --profile local up -d
+```
+
+Then open http://127.0.0.1:18765 and paste the token from `docker compose logs relayforge`.
+
+> **Security note:** the container never bakes in `.env`, `config.json`, or any
+> API key. Mount your own `config.json` (read-only) and set `RELAYFORGE_TOKEN`
+> in a `.env` file next to `docker-compose.yml`, or let RelayForge auto-generate
+> a token into the `/app/data` volume.
+
+### E. Verify with curl
 
 ```bash
 # List models
@@ -285,8 +323,13 @@ If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedenc
 - Light, dark, and system appearance modes
 - Safer local-first configuration and diagnostics
 
+### Completed in v0.3.3
+- Docker support — official container image on GHCR, non-root, ~60 MB
+- Config hot-reload — edit `config.json` without restarting the server
+- Rate limiting dashboard — dedicated tab for 429 stats, key-pool cooldown, and per-provider quota
+- server.js modular slimdown — rendering and provider-probe logic extracted into dedicated modules
+
 ### Next: v0.4.x
-- Docker support
 - Config import/export
 - Provider health checks UI
 - More client presets
@@ -301,5 +344,5 @@ If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedenc
 
 ---
 
-[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.1.md) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)
+[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.3.md) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)
 

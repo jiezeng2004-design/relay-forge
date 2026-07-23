@@ -1,4 +1,4 @@
-﻿// Dashboard HTML + embedded admin client.
+// Dashboard HTML + embedded admin client.
 // Pure: takes a status snapshot object and returns a string.
 // The status object is built by the caller so this stays free of side
 // effects and easy to render in unit tests.
@@ -28,6 +28,7 @@ import { renderRoutesTab } from "./tabs/routes.js";
 import { renderToolCards } from "./tabs/tools.js";
 import { renderUsageTab } from "./tabs/usage.js";
 import { renderSettingsTab } from "./tabs/settings.js";
+import { renderRateLimitingTab } from "./tabs/rate-limiting.js";
 import { renderIdeTab } from "./tabs/ide.js";
 import { renderComboModelsTab } from "./tabs/combo-models.js";
 import { renderClientsTab } from "./tabs/clients.js";
@@ -292,6 +293,7 @@ export function renderDashboard(status, port, options = {}) {
   const settingsTab = renderSettingsTab({
     healthRows, discoveryRows, balanceRows, port, status, relayAuth: relayAuthState
   });
+  const rateLimitingTab = renderRateLimitingTab({ status, port });
 
   return `<!doctype html>
 <html lang="zh-CN" data-appearance="system">
@@ -317,6 +319,7 @@ export function renderDashboard(status, port, options = {}) {
         <li><a href="#usage" data-tab="usage"><span class="nav-icon">05</span>Usage <span class="count">${recentErrorCount}</span></a></li>
         <li><a href="#diagnostics" data-tab="diagnostics"><span class="nav-icon">06</span>Diagnostics</a></li>
         <li><a href="#settings" data-tab="settings"><span class="nav-icon">07</span>Settings</a></li>
+        <li><a href="#rate-limiting" data-tab="rate-limiting"><span class="nav-icon">08</span>Rate Limiting</a></li>
       </ul>
       <div class="rf-sidebar-footer">
         <strong>Safety posture</strong>
@@ -333,6 +336,7 @@ export function renderDashboard(status, port, options = {}) {
       <section id="tab-usage" class="tab-pane" data-pane="usage">${usageTab}</section>
       <section id="tab-diagnostics" class="tab-pane" data-pane="diagnostics">${diagnosticsTab}</section>
       <section id="tab-settings" class="tab-pane" data-pane="settings">${settingsTab}</section>
+      <section id="tab-rate-limiting" class="tab-pane" data-pane="rate-limiting">${rateLimitingTab}</section>
     </main>
   </div>
   <div id="profile-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">

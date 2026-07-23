@@ -1,10 +1,48 @@
 # Changelog
 
-## Unreleased
+## v0.3.3 - 2026-07-23
 
 ### Added
 
-- Expanded `docs/open-source-application.md` into a reviewer-friendly evidence
+- Docker support: official container image on GHCR (`ghcr.io/jiezeng2004-design/relayforge`),
+  non-root `node` user, ~60 MB, with `docker-compose.yml` including optional Ollama sidecar.
+  CI release pipeline pushes to GHCR on version tags.
+- Config hot-reload: `src/config-watcher.js` watches `config.json` for external edits,
+  validates, and hot-swaps `keyPool`, `providerRegistry`, and `routeRuntime` without
+  restarting the server or dropping in-flight requests. Uses `fs.watch()` + debounce
+  + O_EXCL lock for zero-dependency concurrent-write safety.
+- `GET /admin/config/reload-status` — exposes the last reload time, success/failure,
+  and message.
+- Rate Limiting dashboard tab: dedicated page showing per-provider and per-route
+  daily request counts vs configured limits, 429 error statistics, key-pool cooldown
+  status, and a form to adjust thresholds via `PATCH /admin/limits`.
+- `GET /admin/limits` and `PATCH /admin/limits` — dedicated endpoints to read and
+  update `config.limits` (global, per-provider, per-route, per-model) without
+  touching the full config.
+- Settings page now shows a config hot-reload status banner.
+- `scripts/strip-bom.mjs` — removes UTF-8 BOM from all `.js` and `.json` files
+  under `src/` and `i18n/`, integrated as a `build-dist` pre-step.
+
+### Changed
+
+- `server.js` modular slimdown: `renderTokenPrompt` extracted to
+  `src/dashboard/token-prompt.js`; `renderErrorRow`, `classifyErrorCounts`,
+  `topUsageLabel`, `formatTimestamp`, `buildProfileDefaultOptions`, `renderRouteRow`
+  extracted to `src/dashboard/fragments.js`. Dead-code `renderProviderTableRow`
+  removed (the imported `renderDashboardProviderRow` from `dashboard/rows.js`
+  was already used everywhere).
+- `build-dist` now runs `strip-bom` automatically before packaging.
+- ROADMAP marks Docker, config hot-reload, and rate-limiting dashboard as
+  shipped in v0.3.3.
+- `SUPPORTED_TABS` now includes `"rate-limiting"`.
+- README (en/zh) updated with Docker deployment section and v0.3.3 roadmap.
+
+### Fixed
+
+- Removed UTF-8 BOM from `src/server.js`, `src/dashboard/index.js`, and
+  `src/dashboard/tabs/providers.js`.
+
+### Expanded `docs/open-source-application.md` into a reviewer-friendly evidence
   page for open-source maintainer support applications.
 - Added root-level `CONTRIBUTING.md` and `SECURITY.md` files so reviewers and
   contributors can quickly find the contribution checklist and vulnerability

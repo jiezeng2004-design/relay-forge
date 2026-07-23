@@ -1,4 +1,4 @@
-﻿import { escapeHtml } from "../../http-helpers.js";
+import { escapeHtml } from "../../http-helpers.js";
 import { formatTimestamp } from "../shared.js";
 
 export function renderProvidersTab(ctx) {
