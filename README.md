@@ -1,52 +1,65 @@
-# RelayForge v0.3.3
-
-**Zero-dependency local-first AI coding gateway** - OpenAI / Anthropic compatible.
-Unify your local (Ollama / LM Studio) and cloud API providers behind `http://127.0.0.1:18765/v1` with combo routing,
-fallback, request privacy, and lightweight usage analytics.
+# RelayForge
 
 [![CI](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml/badge.svg)](https://github.com/jiezeng2004-design/relay-forge/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.3.3-blue.svg)](package.json)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 [![Platform](https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey.svg)]()
 
----
+> **One local endpoint for all your AI coding providers.**
+>
+> Stop reconfiguring Codex, OpenCode, Claude-compatible clients and other coding tools every time you switch model providers.
 
-## Why RelayForge?
+RelayForge is a **zero-dependency, local-first AI gateway** that puts local models and cloud APIs behind one OpenAI / Anthropic-compatible endpoint:
 
-AI coding tools (Codex, opencode, Claude Code, CC Switch, Cline) need access to multiple LLM providers.
-Managing API keys, rate limits, fallback behavior, and privacy across every tool is painful.
-RelayForge gives you a single local endpoint that handles it all - with zero npm dependencies.
+Current release: **v0.3.3**. It is distributed as a local zip / source / container project, not as an npm package.
 
-```mermaid
-flowchart LR
-  A[AI coding client] --> B[RelayForge /v1 endpoint]
-  B --> C[Combo resolver]
-  C --> D[Provider candidates]
-  D --> E1[Ollama local]
-  D --> E2[DeepSeek API]
-  D --> E3[Groq API]
-  D --> E4[...]
-  B --> F[RequestLog / Privacy]
-  B --> G[Usage Analytics]
+```text
+http://127.0.0.1:18765/v1
 ```
 
-## Features
+You configure your providers once. Your coding clients talk to RelayForge. RelayForge handles routing, fallback, privacy-safe request metadata and lightweight usage analytics.
 
-- **Premium Dashboard UX** - v0.3.0 adds screenshot-ready Overview, Providers, Combo Models, Clients, Usage, Diagnostics, and Settings pages with light/dark/system appearance support.
-- **Zero dependencies** - runs on Node.js built-ins only
-- **Local-first** - binds to `127.0.0.1` by default, no telemetry, no cloud lock-in
-- **OpenAI / Anthropic compatible** - `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, `/v1/models`
-- **Combo models** - virtual model names that combine multiple providers with fallback / round_robin / weighted_round_robin
-- **Smart fallback** - 429/503/timeout triggers cascade to the next candidate
-- **Privacy by default** - prompts are never logged; API keys are redacted
-- **Recent requests** - last 20 request metadata (model, provider, latency, status) without prompt content
-- **Provider registry** - capability-based provider queries (`openai_chat`, `anthropic_messages`, `streaming`, `tools`...)
-- **No OAuth subscription tokens** - RelayForge does not read or forward Claude Code / Codex / Cursor personal tokens
+## The problem
 
-## Screenshots and Demo
+A typical AI coding setup grows messy fast:
 
-Captured from a real RelayForge v0.3.0 dashboard run with a clean demo config and demo token. No real API keys, private prompts, usernames, or private logs are shown.
+```text
+Codex      → Provider A config
+OpenCode   → Provider B config
+Cline      → Provider C config
+Other tool → another set of keys and URLs
+```
+
+Then one provider rate-limits, a cheap endpoint becomes unstable, or you want to move a model back to Ollama.
+
+RelayForge turns that into:
+
+```text
+AI coding clients
+      ↓
+RelayForge
+      ↓
+smart-coding / combo routes
+      ↓
+Ollama / LM Studio / DeepSeek / Groq / other providers
+```
+
+Your clients keep one local Base URL while routing changes happen behind it.
+
+## What you get
+
+- **One local endpoint** for multiple coding clients.
+- **OpenAI + Anthropic-compatible APIs** for common chat/message/response flows.
+- **Combo models** that can route across multiple providers.
+- **Fallback** when a candidate hits 429, 503 or timeouts.
+- **Round-robin / weighted round-robin** routing options.
+- **Local-first privacy**: prompts are not written to the request log.
+- **Redacted credentials**: API keys are not exposed in dashboard/log output.
+- **Lightweight usage visibility**: model, provider, latency and status metadata.
+- **Zero npm runtime dependencies**.
+- **No subscription-token scraping**: RelayForge does not read Codex, Claude Code or Cursor personal OAuth tokens.
+
+## Dashboard
 
 | Overview | Combo Models |
 | --- | --- |
@@ -56,49 +69,37 @@ Captured from a real RelayForge v0.3.0 dashboard run with a clean demo config an
 | --- | --- |
 | ![RelayForge clients](docs/assets/relayforge-v0.3-clients.png) | ![RelayForge diagnostics](docs/assets/relayforge-v0.3-diagnostics.png) |
 
-| Providers | Usage |
-| --- | --- |
-| ![RelayForge providers](docs/assets/relayforge-v0.3-providers.png) | ![RelayForge usage](docs/assets/relayforge-v0.3-usage.png) |
-
-Dark mode and settings:
-
-| Dark Overview | Settings |
-| --- | --- |
-| ![RelayForge dark overview](docs/assets/relayforge-v0.3-overview-dark.png) | ![RelayForge settings](docs/assets/relayforge-v0.3-settings.png) |
-
-Demo:
+Fallback demo:
 
 ![RelayForge fallback demo](docs/assets/relayforge-v0.3-fallback-demo.gif)
 
-For reviewers, [docs/open-source-application.md](docs/open-source-application.md)
-summarizes the public evidence for open-source maintainer support applications:
-project scope, privacy boundary, release verification, demo assets, and
-maintainer rationale.
+## Quick start
 
-## Quick Start
+### Windows zip
 
-### A. Windows zip users
+1. Download the latest RelayForge zip from Releases.
+2. Extract it.
+3. Double-click `Start_RelayForge.cmd`.
+4. Open `http://127.0.0.1:18765`.
+5. Copy the local token from the startup log.
 
-1. Unzip `relayforge-0.3.3.zip`
-2. Double-click **`Start_RelayForge.cmd`**
-3. Open http://127.0.0.1:18765 in your browser
-4. Copy the token from the startup log
-5. In your AI coding tool, set:
-   ```
-   Base URL: http://127.0.0.1:18765/v1
-   API Key:  <RELAYFORGE_TOKEN from startup log>
-   Model:    smart-coding
-   ```
+Then point your coding client to:
 
-### B. PowerShell users
+```text
+Base URL: http://127.0.0.1:18765/v1
+API Key:  <RELAYFORGE_TOKEN>
+Model:    smart-coding
+```
+
+### PowerShell
 
 ```powershell
 $env:RELAYFORGE_TOKEN = "my-local-token"
-$env:RELAYFORGE_PORT  = "18765"
+$env:RELAYFORGE_PORT = "18765"
 node src/server.js
 ```
 
-### C. macOS / Linux / WSL users
+### macOS / Linux / WSL
 
 ```bash
 export RELAYFORGE_TOKEN="my-local-token"
@@ -106,12 +107,9 @@ export RELAYFORGE_PORT="18765"
 node src/server.js
 ```
 
-### D. Docker users
+## Docker
 
-RelayForge ships an official container image on GHCR. The image is ~60 MB,
-runs as a non-root `node` user, and keeps all runtime state on a `/app/data` volume.
-
-**Option 1 — pull the prebuilt image:**
+RelayForge also ships a GHCR container image.
 
 ```bash
 docker run -d --name relayforge \
@@ -121,79 +119,25 @@ docker run -d --name relayforge \
   ghcr.io/jiezeng2004-design/relayforge:latest
 ```
 
-Grab the auto-generated token from the logs:
+Get the generated token from logs:
 
 ```bash
 docker logs relayforge 2>&1 | grep "local relay token"
 ```
 
-**Option 2 — docker compose (with optional Ollama sidecar):**
+Or use Compose:
 
 ```bash
-# Cloud providers only
 docker compose up -d
+```
 
-# With a local Ollama sidecar
+With the optional local Ollama sidecar:
+
+```bash
 docker compose --profile local up -d
 ```
 
-Then open http://127.0.0.1:18765 and paste the token from `docker compose logs relayforge`.
-
-> **Security note:** the container never bakes in `.env`, `config.json`, or any
-> API key. Mount your own `config.json` (read-only) and set `RELAYFORGE_TOKEN`
-> in a `.env` file next to `docker-compose.yml`, or let RelayForge auto-generate
-> a token into the `/app/data` volume.
-
-### E. Verify with curl
-
-```bash
-# List models
-curl http://127.0.0.1:18765/v1/models \
-  -H "Authorization: Bearer my-local-token"
-
-# Chat completion
-curl http://127.0.0.1:18765/v1/chat/completions \
-  -H "Authorization: Bearer my-local-token" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"smart-coding","messages":[{"role":"user","content":"Hello!"}]}'
-
-# Admin status
-curl http://127.0.0.1:18765/admin/status \
-  -H "Authorization: Bearer my-local-token"
-```
-
-## Client Setup
-
-### CC Switch
-
-```
-Name: RelayForge
-Base URL: http://127.0.0.1:18765/v1
-API Key: <RELAYFORGE_TOKEN>
-Model: smart-coding (or any combo/route/provider:model)
-```
-
-### opencode
-
-```json
-{
-  "agents": {
-    "defaults": {
-      "model": { "primary": "smart-coding" }
-    }
-  },
-  "models": {
-    "providers": {
-      "relayforge": {
-        "baseUrl": "http://127.0.0.1:18765/v1",
-        "apiKey": "<RELAYFORGE_TOKEN>",
-        "api": "openai-completions",
-        "models": [{ "id": "smart-coding" }]
-      }
-    }
-  }
-}
-```
+## Client setup
 
 ### Codex / OpenAI-compatible clients
 
@@ -202,147 +146,119 @@ export OPENAI_BASE_URL="http://127.0.0.1:18765/v1"
 export OPENAI_API_KEY="<RELAYFORGE_TOKEN>"
 ```
 
-### Claude Code (OpenAI-compatible mode)
+### OpenCode
+
+Use RelayForge as an OpenAI-compatible provider:
+
+```text
+Base URL: http://127.0.0.1:18765/v1
+API Key:  <RELAYFORGE_TOKEN>
+Model:    smart-coding
+```
+
+RelayForge authenticates `/v1/*` by default. If OpenCode is given only the Base URL, requests will fail with 401. Use the same local token printed at startup, then choose `smart-coding` or any route/combo model exposed by RelayForge.
+
+### Claude-compatible clients
+
+For clients that support a configurable Anthropic-compatible endpoint:
 
 ```bash
 export ANTHROPIC_BASE_URL="http://127.0.0.1:18765/v1"
 export ANTHROPIC_API_KEY="<RELAYFORGE_TOKEN>"
 ```
 
-> **Security note:** RelayForge uses API-key based configuration. It does not read or forward OAuth subscription tokens from Claude Code, Codex, or Cursor. Your upstream provider credentials stay under your control.
+RelayForge uses API-key based provider configuration. It does **not** extract or forward personal subscription OAuth tokens from Codex, Claude Code, Cursor or similar apps.
 
-## Configuration
+## Combo models
 
-### Providers
+The most useful RelayForge feature is the ability to expose one virtual model name backed by several real providers.
 
-```json
-{
-  "providers": [
-    { "name": "ollama", "baseUrl": "http://127.0.0.1:11434/v1", "models": ["qwen2.5:7b"] },
-    { "name": "deepseek", "baseUrl": "https://api.deepseek.com/v1", "keyEnv": "DEEPSEEK_API_KEYS", "models": ["deepseek-chat"] }
-  ]
-}
+Example idea:
+
+```text
+smart-coding
+   ├─ DeepSeek primary
+   ├─ Groq fallback
+   └─ Ollama local fallback
 ```
 
-### Routes
+Depending on the configured strategy, candidates can be used as:
 
-Routes define named model groups with fallback/round_robin/weighted strategies:
+- fallback;
+- round robin;
+- weighted round robin.
 
-```json
-{
-  "routes": [{
-    "name": "coding-local",
-    "strategy": "fallback",
-    "candidates": [
-      { "provider": "deepseek", "model": "deepseek-chat", "weight": 3 },
-      { "provider": "ollama", "model": "qwen2.5:7b", "weight": 1 }
-    ]
-  }]
-}
+That means your coding client can continue asking for `smart-coding` even while you change the actual providers behind it.
+
+## Why local-first matters
+
+RelayForge binds to `127.0.0.1` by default and is designed to keep the control plane on your machine.
+
+Privacy defaults include:
+
+- prompts are not stored in the recent-request log;
+- provider API keys are redacted;
+- local state stays on your machine unless you explicitly mount or sync it elsewhere;
+- Docker images do not bake your `.env`, `config.json` or provider secrets into the image.
+
+## Verify the gateway
+
+Use the local token printed at startup as a Bearer credential.
+
+List models:
+
+```bash
+curl http://127.0.0.1:18765/v1/models \
+  -H "Authorization: Bearer <RELAYFORGE_TOKEN>"
 ```
 
-### Combo Models
+Send a chat completion:
 
-Combos are virtual models with built-in health-aware routing:
-
-```json
-{
-  "combos": [{
-    "name": "smart-coding",
-    "strategy": "fallback",
-    "candidates": [
-      { "provider": "deepseek", "model": "deepseek-chat", "weight": 3, "priority": 2, "enabled": true },
-      { "provider": "groq", "model": "llama-3.1-8b-instant", "weight": 2, "priority": 1, "enabled": true },
-      { "provider": "ollama", "model": "qwen2.5:7b", "weight": 1, "priority": 0, "enabled": true }
-    ]
-  }, {
-    "name": "weighted-pool",
-    "strategy": "weighted_round_robin",
-    "candidates": [
-      { "provider": "deepseek", "model": "deepseek-chat", "weight": 5 },
-      { "provider": "siliconflow", "model": "Qwen/Qwen2.5-7B-Instruct", "weight": 2 },
-      { "provider": "ollama", "model": "qwen2.5:7b", "weight": 1 }
-    ]
-  }]
-}
+```bash
+curl http://127.0.0.1:18765/v1/chat/completions \
+  -H "Authorization: Bearer <RELAYFORGE_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"smart-coding","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
-Use `profile.defaultModel` to reference combo names:
+Do not paste the local token into README examples, screenshots, or git commits.
 
-```json
-{
-  "profiles": [{
-    "name": "coding",
-    "defaultModel": "smart-coding"
-  }]
-}
+## What RelayForge is not
+
+- It is not a cloud proxy service.
+- It does not sell model access.
+- It does not scrape consumer subscription tokens.
+- It does not make an unstable upstream provider reliable by magic; it gives you routing and fallback options when multiple candidates are available.
+- It does not log prompt bodies for analytics.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  A[AI coding client] --> B[RelayForge local API]
+  B --> C[Route / combo resolver]
+  C --> D1[Local provider]
+  C --> D2[Cloud provider A]
+  C --> D3[Cloud provider B]
+  B --> E[Privacy-safe request metadata]
+  B --> F[Usage analytics]
 ```
 
-### Privacy
+The project intentionally keeps the runtime small and uses Node.js built-ins instead of a large dependency tree.
 
-```json
-{
-  "privacy": {
-    "logPrompts": false,
-    "logHeaders": false
-  }
-}
+## Project philosophy
+
+RelayForge is for people who want to change **providers without reconfiguring every client**.
+
+The product boundary is simple:
+
+```text
+Clients know RelayForge.
+RelayForge knows providers.
 ```
 
-Prompts are never stored in dashboard logs by default.
+That separation is what makes fallback, routing and provider switching useful.
 
-## Environment Variables
+## License
 
-| Variable | Recommended | Legacy (backward compat) |
-|----------|-------------|-------------------------|
-| `RELAYFORGE_TOKEN` | Yes - Token for /v1/* and /admin/* | `RELAY_TOKEN` / `OPENRELAY_TOKEN` |
-| `RELAYFORGE_CONFIG` | Yes - Custom config path | `OPENRELAY_CONFIG` |
-| `RELAYFORGE_STATE` | Yes - Custom state path | `OPENRELAY_STATE` |
-| `RELAYFORGE_PORT` | Yes - Port override | `PORT` / `OPENRELAY_PORT` |
-| `RELAYFORGE_ALLOW_NO_AUTH` | Yes - Disable auth (dev only) | `OPENRELAY_ALLOW_NO_AUTH` |
-
-If both `RELAYFORGE_*` and `OPENRELAY_*` are set, `RELAYFORGE_*` takes precedence.
-
-## Design Focus
-
-| Focus | RelayForge |
-|---|---|
-| Runtime dependencies | Zero npm dependencies |
-| Default exposure | Localhost-first |
-| Prompt logging | Off by default |
-| API-key routing | Supported through local provider config |
-| OAuth subscription token routing | Not supported by design |
-| License | MIT |
-
-## Roadmap
-
-### Completed in v0.3.0
-- Dashboard UX redesign
-- Client setup cards
-- Usage, Diagnostics, and Settings pages
-- Light, dark, and system appearance modes
-- Safer local-first configuration and diagnostics
-
-### Completed in v0.3.3
-- Docker support — official container image on GHCR, non-root, ~60 MB
-- Config hot-reload — edit `config.json` without restarting the server
-- Rate limiting dashboard — dedicated tab for 429 stats, key-pool cooldown, and per-provider quota
-- server.js modular slimdown — rendering and provider-probe logic extracted into dedicated modules
-
-### Next: v0.4.x
-- Config import/export
-- Provider health checks UI
-- More client presets
-- Release packaging polish
-
-### Not planned
-- OAuth subscription token routing
-- Cloud-hosted key sync
-- Built-in account sharing
-- Bypassing provider rate limits
-- Storing full prompts by default
-
----
-
-[MIT License](LICENSE) | [Third Party Notices](THIRD_PARTY_NOTICES.md) | [Release Notes](docs/release-v0.3.3.md) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)
-
+MIT. See [LICENSE](LICENSE).
