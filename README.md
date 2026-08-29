@@ -208,13 +208,15 @@ Use the local token printed at startup as a Bearer credential.
 List models:
 
 ```bash
-curl http://127.0.0.1:18765/v1/models
+curl http://127.0.0.1:18765/v1/models \
+  -H "Authorization: Bearer <RELAYFORGE_TOKEN>"
 ```
 
 Send a chat completion:
 
 ```bash
 curl http://127.0.0.1:18765/v1/chat/completions \
+  -H "Authorization: Bearer <RELAYFORGE_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{"model":"smart-coding","messages":[{"role":"user","content":"Hello"}]}'
 ```
